@@ -1,0 +1,13 @@
+<svg width="420" height="100" viewBox="0 0 420 100" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- White wordmark -->
+  <text x="10" y="68"
+        font-family="Inter, Poppins, 'Segoe UI', Arial, sans-serif"
+        font-size="60"
+        font-weight="600"
+        letter-spacing="-0.4"
+        fill="#FFFFFF">
+    Aakaar
+  </text>
+
+</svg>
