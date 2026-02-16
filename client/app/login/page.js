@@ -1,6 +1,6 @@
 'use client' 
 import Image from "next/image"
-import LoginCard from "@/components/ui/login/login-card"
+import LoginCard from "@/components/login/login-card"
 
 const Login = () => {
   return (
