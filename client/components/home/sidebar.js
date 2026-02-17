@@ -1,5 +1,6 @@
 "use client";
-import {Plus} from "lucide-react"
+import Link from "next/link";
+import {Plus,Home,FolderOpen,CreditCard} from "lucide-react"
 function SideBar(){
     return <aside className="w-[72px] bg-[#f8f8fc] border-r flex flex-col items-center py-4 fixed left-0 top-0 h-full z-10">
         <div className="flex flex-col items-center">
@@ -20,7 +21,7 @@ function SideBar(){
                         icon: <FolderOpen className="h-6 w-6"/>, label : 'Projects', active : false
                     },
                     {
-                        icon: <Credit className="h-6 w-6"/>, label : 'Billing', active : false
+                        icon: <CreditCard className="h-6 w-6"/>, label : 'Billing', active : false
                     },
                 ].map((menuItem,index)=>(
                     <div key={index} className="flex flex-col items-center w-full">
