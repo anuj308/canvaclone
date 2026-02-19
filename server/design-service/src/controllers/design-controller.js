@@ -4,7 +4,6 @@ const Design = require('../models/design');
 exports.getUserDesigns = async(req,res)=>{
     try {
         const userId = req.user.userId;
-        
         const designs = await Design.find({userId}).sort({updated: -1});
 
         res.status(200).json({
