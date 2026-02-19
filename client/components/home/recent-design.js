@@ -1,11 +1,12 @@
 "use client"
 
 import { getUserDesigns } from "@/services/design-service"
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react"
 
 function RecentDesigns(){
     const [userDesigns,setUserDesigns] = useState([]);
-       
+    const router = useRouter()
     async function fetchUserDesigns(){
         const result = await getUserDesigns();
         if(result?.success) setUserDesigns(result?.data)
@@ -24,7 +25,7 @@ function RecentDesigns(){
                 }
                 {
                     userDesigns.map(designs=>(
-                        <div key={designs._id} className="group cursor-pointer">
+                        <div onClick={()=> router.push(`/editor/${designs?._id}`)} key={designs._id} className="group cursor-pointer">
                             <div className="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden transition-shadow group-hover:shadow-md"/>
                             <p className="font-bold text-sm truncate">{designs.name}</p>
                         </div>
