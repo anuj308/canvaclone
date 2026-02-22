@@ -3,9 +3,9 @@
 import { LogOut, Search } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
-import { Input } from "../ui/input";
-import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 function Header(){
     const {data:session} = useSession();

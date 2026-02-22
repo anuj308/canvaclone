@@ -1,5 +1,5 @@
 const { Sparkle } = require("lucide-react");
-import {Button} from '../ui/button';
+import {Button} from '@/components/ui/button';
 
 function Aifeatures(){
     return (
