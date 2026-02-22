@@ -19,13 +19,13 @@ function Header(){
         <div className="header-gradient header flex items-center px-4 h-14">
             <div className="flex items-center space-x-2">
                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild="true">
+                    <DropdownMenuTrigger asChild>
                         <button className="header-button flex items-center text-white ">
                             <span>{isEditing==true ? 'Editing' : 'Viewing'}</span>
                             <ChevronDown className="ml-1 h-4 w-4 "/>
                         </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent asChild="start">
+                    <DropdownMenuContent align="start">
                         <DropdownMenuItem onClick={()=> setIsEditing(true)}>
                             <PenIcon className="mr-2 h-4 w-4"/>
                             <span>Editing</span>
