@@ -52,3 +52,35 @@ export const designTypes = [
     icon: <Star className="w-7 h-7 text-white" strokeWidth={2.5} />
   }
 ];
+
+export const textPresets = [
+  {
+    name: 'Heading',
+    text: 'Add a Heading',
+    fontSize: 36,
+    fontWeight: 'bold',
+    fontFamily: 'Inter, sans-serid'
+  },
+  {
+    name: 'Sub Heading',
+    text: 'Add a Sub Heading',
+    fontSize: 24,
+    fontWeight: 'bold',
+    fontFamily: 'Inter, sans-serid'
+  },
+  {
+    name: 'Body Text',
+    text: 'Add a little bit of body text',
+    fontSize: 16,
+    fontWeight: 'normal',
+    fontFamily: 'Inter, sans-serid'
+  },
+  {
+    name: 'Caption',
+    text: 'Add a caption',
+    fontSize: 12,
+    fontWeight: 'normal',
+    fontFamily: 'Inter, sans-serid',
+    fontStyle: 'normal'
+  }
+]

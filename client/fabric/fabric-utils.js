@@ -1,3 +1,4 @@
+import { TextAlignCenter } from 'lucide-react';
 import { shapeDefinations } from './shapes/shape-definations';
 import { createShape } from './shapes/shape-factory';
 
@@ -46,11 +47,41 @@ export const addShapeToCanvas = async (canvas,shapeType, customProps={})=>{
         if(shape){
             shape.id = `${shapeType}-${Date.now()}`
             canvas.add(shape)
-            canvas.renderAll()
             canvas.setActiveObject(shape)
+            canvas.renderAll()
             return shape
         }
     } catch (error) {
         console.error(error)
+    }
+}
+
+export const addTextToCanvas = async (canvas, text, options = {}, withBackground = false)=>{
+    if(!canvas) return null;
+
+    try {
+        const {IText} = await import('fabric');
+
+        const defaultProps = {
+            left: 100,
+            top: 100,
+            fontSize: 24,
+            fontFamily: 'Arial',
+            fill: '#000000',
+            padding: withBackground ? 10 : 0,
+            TextAlign: 'left',
+            id: `text-${Date.now()}`
+        }
+
+        const textObj = new IText(text,{
+            ...defaultProps,
+            ...options
+        })
+
+        canvas.add(textObj)
+        canvas.setActiveObject(textObj)
+        canvas.renderAll()
+    } catch (error) {
+        return null
     }
 }
