@@ -3,6 +3,7 @@
 import { useEditorStore } from "@/store";
 import { useEffect,useState, useRef } from "react";
 import { shapeDefinations, shapeTypes } from "@/fabric/shapes/shape-definations";
+import { addShapeToCanvas } from "@/fabric/fabric-utils";
 
 function ElementPanel(){
 
@@ -72,12 +73,16 @@ function ElementPanel(){
         }
     }
 
+    const handleShapeCick = (type)=>{
+        addShapeToCanvas(canvas,type);
+    }
+
     return (
-        <div className="h-full overflow-y-auto p-2">
+        <div className="h-full overflow-y-auto p-0">
             <div className="grid grid-cols-3 gap-1">
                 {
                     shapeTypes.map(shapeType=> (
-                        <div style={{height: '90px'}} className="cursor-pointer flex flex-col items-center justify-center" key={shapeType}>
+                        <div onClick={()=> handleShapeCick(shapeType)} style={{height: '90px'}} className="cursor-pointer flex flex-col items-center justify-center" key={shapeType}>
                             <canvas
                             width="100"
                             height="100"

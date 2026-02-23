@@ -6,10 +6,12 @@ export const shapeDefinitions = {
     thumbnail: (fabric, canvas) => {
       const { Rect } = fabric;
       const rect = new Rect({
-        left: 15,
-        top: 35,
+        left: 50,
+        top: 50,
+        originX: "center",
+        originY: "center",
         width: 70,
-        height: 35,
+        height: 42,
         fill: "#000000",
       });
       canvas.add(rect);
@@ -22,8 +24,10 @@ export const shapeDefinitions = {
     thumbnail: (fabric, canvas) => {
       const { Rect } = fabric;
       const square = new Rect({
-        left: 20,
-        top: 20,
+        left: 50,
+        top: 50,
+        originX: "center",
+        originY: "center",
         width: 60,
         height: 60,
         fill: "#000000",
@@ -38,8 +42,10 @@ export const shapeDefinitions = {
     thumbnail: (fabric, canvas) => {
       const { Circle } = fabric;
       const circle = new Circle({
-        left: 20,
-        top: 20,
+        left: 50,
+        top: 50,
+        originX: "center",
+        originY: "center",
         radius: 30,
         fill: "#000000",
       });
@@ -53,8 +59,10 @@ export const shapeDefinitions = {
     thumbnail: (fabric, canvas) => {
       const { Triangle } = fabric;
       const triangle = new Triangle({
-        left: 20,
-        top: 20,
+        left: 50,
+        top: 50,
+        originX: "center",
+        originY: "center",
         width: 60,
         height: 60,
         fill: "#000000",
@@ -69,8 +77,10 @@ export const shapeDefinitions = {
     thumbnail: (fabric, canvas) => {
       const { Ellipse } = fabric;
       const ellipse = new Ellipse({
-        left: 15,
-        top: 35,
+        left: 50,
+        top: 50,
+        originX: "center",
+        originY: "center",
         rx: 35,
         ry: 18,
         fill: "#000000",
@@ -222,13 +232,13 @@ export const shapeDefinitions = {
     type: "path",
     label: "Double Arrow",
     defaultProps: {
-      path: "M 20,40 L 180,40 L 180,20 L 220,50 L 180,80 L 180,60 L 20,60 L 20,80 L 0,50 L 20,20 z",
+      path: "M 15,50 L 35,35 L 35,45 L 65,45 L 65,35 L 85,50 L 65,65 L 65,55 L 35,55 L 35,65 z",
       fill: "#000000",
     },
     thumbnail: (fabric, canvas) => {
       const { Path } = fabric;
       const doubleArrowPath =
-        "M 15,50 L 50,50 L 50,35 L 85,50 L 50,65 L 50,50 L 15,50 M 85,50 L 50,50 L 50,35 L 15,50 L 50,65 L 50,50 L 85,50";
+        "M 15,50 L 35,35 L 35,45 L 65,45 L 65,35 L 85,50 L 65,65 L 65,55 L 35,55 L 35,65 z";
       const doubleArrow = new Path(doubleArrowPath, {
         fill: "#000000",
       });
