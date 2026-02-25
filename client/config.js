@@ -84,3 +84,18 @@ export const textPresets = [
     fontStyle: 'normal'
   }
 ]
+
+export const brushSizes = 
+[{ value: 2, label: "Small" },
+   { value: 5, label: "Medium" }, { value: 10, label: "Large" },
+    { value: 20, label: "Extra Large" },];
+
+export const drawingPanelColorPresets = [
+  "#000000", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFD1DC", "#FFADAD", 
+  "#FFD6A5", "#FDFFB6", "#CAFFBF", "#FF9900", "#9900FF", "#FF00FF", "#00FFFF", "#FFFF00", 
+  // Muted colors "#6B705C", "#A5A58D", "#B7B7A4", "#CB997E", "#DDBEA9",
+  //  // Dark colors "#1A1A2E", "#16213E", "#0F3460", "#533483", "#E94560",
+ ];
+
+export const fontFamilies = ["Arial", "Helvetica", "Times New Roman", "Courier New", 
+  "Georgia", "Verdana", "Impact", "Comic Sans MS",];

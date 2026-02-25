@@ -85,3 +85,71 @@ export const addTextToCanvas = async (canvas, text, options = {}, withBackground
         return null
     }
 }
+
+export const toogleDrawingMode = (canvas,isDrawingMode,drawingColor="#000000",brushWidth=5)=>{
+    if(!canvas) return null;
+    try {
+        canvas.isDrawingMode = isDrawingMode;
+        if(isDrawingMode){
+            canvas.freeDrawingBrush.color = drawingColor;
+            canvas.freeDrawingBrush.brushWidth = brushWidth;
+        }
+
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+export const toogleErasingMode = (canvas,isErasing,previousColor = "#000000",eraseWidth=20)=>{
+    if(!canvas || !canvas.freeDrawingBrush) return false;
+    
+    try {
+       if(isErasing){
+        canvas.freeDrawingBrush.color = "#ffffff";
+        canvas.freeDrawingBrush.width = eraseWidth;
+    } else{
+        canvas.freeDrawingBrush.color = previousColor;
+        canvas.freeDrawingBrush.width = 5;
+    }
+    
+    return true;
+} catch (error) {
+    return false;
+}
+}
+
+// Helper function to convert hex to RGB
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+export const updateDrawingBrush = (canvas,properties={})=>{
+    if(!canvas || !canvas.freeDrawingBrush) return false;
+
+    try {
+        const {color,width,opacity} = properties;
+
+        if(width !== undefined){
+            canvas.freeDrawingBrush.width = width;
+        }
+
+        if(color !== undefined && opacity !== undefined){
+            const rgb = hexToRgb(color);
+            if(rgb){
+                canvas.freeDrawingBrush.color = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+            }
+        } else if(color !== undefined){
+            canvas.freeDrawingBrush.color = color;
+        }
+        
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
