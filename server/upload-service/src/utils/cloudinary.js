@@ -8,7 +8,7 @@ cloudinary.config({
 
 const uploadMediaToCloudinary = (file)=>{
     return new Promise((resolve,reject)=>{
-        const uploadStream = cloudinary.uploder.upload_stream({
+        const uploadStream = cloudinary.uploader.upload_stream({
             resource_type: 'auto'
         },(err,result)=>{
             if(err){

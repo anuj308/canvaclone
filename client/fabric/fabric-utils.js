@@ -86,6 +86,54 @@ export const addTextToCanvas = async (canvas, text, options = {}, withBackground
     }
 }
 
+export const addImageToCanvas = async (canvas,imageUrl)=>{
+    if(!canvas) return null;
+
+    try {
+        const {Image: FabricImage } = await import("fabric")
+
+        let imageObj = new Image()
+        imageObj.crossOrigin = 'Anonymous'
+        imageObj.src = imageUrl
+
+        return new Promise((resolve,reject)=>{
+            imageObj.onload = ()=>{
+                let image = new FabricImage(imageObj)
+                image.set({
+                    id : `image-${Date.now()}`,
+                    top: 100,
+                    left: 100,
+                    padding: 10,
+                    cornorSize: 10
+                })
+                const maxDimension = 400;
+
+                if(image.width > maxDimension || image.height > maxDimension){
+                    if(image.width > image.height){
+                        const scale = maxDimension/image.width;
+                    }else {
+                        const scale = maxDimension/image.height;
+                        image.scale(scale)
+                    }
+                }
+
+                canvas.add(image)
+                canvas.setActiveObject(image)
+                canvas.renderAll()
+                resolve(image)
+            }
+
+            imageObj.onerror = ()=>{
+                reject(new Error('failed to load image',imageUrl))
+            }
+        })
+
+    } catch (error) {
+        console.error('Error adding image')
+        return null;
+    }
+}
+
 export const toogleDrawingMode = (canvas,isDrawingMode,drawingColor="#000000",brushWidth=5)=>{
     if(!canvas) return null;
     try {

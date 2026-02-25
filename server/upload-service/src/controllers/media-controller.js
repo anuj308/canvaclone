@@ -8,34 +8,34 @@ const uploadMedia = async(req,res)=>{
                 success: false,
                 message: 'No File Found!'
             })
-
-            const {originalname, mimeType, size, width, height} = req.file;error
-            const {userId} = req.user;
-
-            const cloudinaryResult = await uploadMediaToCloudinary(req.file);
-
-            const newlyCreateMedia = new Media({
-                userId,
-                name: originalname,
-                cloudinaryId: cloudinaryResult.public_id,
-                url: cloudinaryResult.secure_url,
-                mimeType: mimeType,
-                size,
-                width,
-                height
-            })
-
-            await newlyCreateMedia.save();
-
-            res.status(201).json({
-                success: true,
-                data: newlyCreateMedia
-            })
         }
+
+        const { originalname, mimetype, size } = req.file;
+        const {userId} = req.user;
+
+        const cloudinaryResult = await uploadMediaToCloudinary(req.file);
+
+        const newlyCreateMedia = new Media({
+            userId,
+            name: originalname,
+            cloudinaryId: cloudinaryResult.public_id,
+            url: cloudinaryResult.secure_url,
+            mimeType: mimetype,
+            size,
+            width: cloudinaryResult.width,
+            height: cloudinaryResult.height
+        })
+
+        await newlyCreateMedia.save();
+
+        res.status(201).json({
+            success: true,
+            data: newlyCreateMedia
+        })
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Error creating asset'
+            message: error?.message || 'Error creating asset'
         })
     }
 }
