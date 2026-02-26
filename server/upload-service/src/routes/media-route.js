@@ -38,6 +38,6 @@ router.post('/upload',authenticatedRequest,(req,res,next)=>{
 },uploadMedia);
 
 router.get('/get', authenticatedRequest, getAllMediasByUser);
-router.get('/ai-image-generator', authenticatedRequest, generateImageFromAiAndUploadToDb);
+router.post('/ai-image-generator', authenticatedRequest, generateImageFromAiAndUploadToDb);
 
 module.exports = router;

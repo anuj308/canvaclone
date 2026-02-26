@@ -1,9 +1,111 @@
 'use client'
 
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { addImageToCanvas } from "@/fabric/fabric-utils";
+import { generateImageFromAI } from "@/services/upload-service";
+import { useEditorStore } from "@/store";
+import { Loader, Sparkle, Wand2 } from "lucide-react";
+import { useState } from "react";
+
 function AiPanel(){
+    const {canvas} = useEditorStore();
+    const [prompt,setPrompt] =useState('');
+    const [isLoading,setIsLoading] = useState(false);
+    const [generateContent,setGenerateContent] = useState(null);
+    const [isUploading,setIsUploading] = useState(false);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
+
+    const handlePromptChange = (e)=>{
+        setPrompt(e.target.value)
+    }
+
+    const handleGenerate =  async()=>{
+        setIsLoading(true);
+        setGenerateContent(null);
+        setUploadSuccess(false);
+
+        try {
+            await generateImage(prompt);
+        } catch (error) {
+            console.error(error)
+        } finally{
+            setIsUploading(false);
+            setIsLoading(false);
+        }
+    }
+
+    const generateImage = async(prompt)=>{
+        try {
+            const response = await generateImageFromAI(prompt);
+            if(response && response?.data?.url){
+                setGenerateContent(response?.data?.url);
+            }
+            console.log(response)
+        } catch (error) {
+            console.error('Error generating Image', error)
+        }
+    }
+
+    const handleAiImageToCanvas = async()=>{
+        if(!canvas && !generateContent) return;
+
+        addImageToCanvas(canvas, generateContent);
+    }
     return (
-        <div>
-            Ai Panel
+        <div className="h-full overflow-y-auto">
+            <div className="p-4 space-y-4">
+                <div className="flex items-center space-x-2 mb-2">
+                    <Wand2 className="h-5 w-5 text-purple-500"/>
+                    <h3 className="text-lg font-semibold">AI Image Generator</h3>
+                </div>
+                <div className="space-y-2">
+                    <Textarea
+                        value={prompt}
+                        onChange={handlePromptChange}
+                        placeholder="e.g , A cute cat image..."
+                        className={'resize-none min-h-[200px]'}
+                        disabled={isLoading}
+                        />
+                </div>
+                <Button
+                    onClick={handleGenerate}
+                    disabled={!prompt.trim() || isLoading}>
+                        {
+                            isLoading ? (<>
+                            <Loader className="mr-2 h-4 w-4 animate-spin"/>
+                            Generating...</>) : (<>
+                            <Sparkle className="mr-2 h-4 w-4"/>
+                            Generate Image</>)
+                        }
+                </Button>
+            </div>
+            {
+                isLoading && (
+                    <div className="border rounded-md bg-gray-50 p-6 flex-col items-center justify-center">
+                        <Loader className="w-8 h-8 animate-spin text-purple-500 mb-3"/>
+                        <p className="text-sm text-center text-gray-600">
+                            Creating your image ...
+                        </p>
+                    </div>
+                )
+            }
+            {
+                generateContent && !isLoading && <div className="space-y-2">
+                    <div className="border rounded-md overflow-hidden">
+                        <img
+                            src={generateContent}
+                            className="w-full h-auto"
+                        />
+                    </div>
+                    <div>
+                        <Button onClick={handleAiImageToCanvas}
+                        className={'flex-1 '} variant={uploadSuccess ? 'outline' : 'default'} disabled={isUploading}>
+                            Add to Canvas
+                        </Button>
+                    </div>
+                </div>
+            }
         </div>
     )
 }

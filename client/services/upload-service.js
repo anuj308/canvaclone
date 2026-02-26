@@ -1,5 +1,6 @@
 import { getSession } from "next-auth/react"
 import axios from "axios";
+import { fetchWithAuth } from "./base-service";
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:5000'
@@ -30,5 +31,20 @@ export async function uploadFileWithAuth(file,metaData={}){
 
     } catch (error) {
         throw new Error(error?.response?.data?.message || 'Upload Failed')
+    }
+}
+
+export async function generateImageFromAI(prompt){
+    try {
+        const response = await fetchWithAuth('/v1/media/ai-image-generator',{
+            method: 'POST',
+            body: {
+                prompt
+            }
+        })
+
+        return response;
+    } catch (error) {
+        throw new Error(error?.message || 'Failed to generate image from AI');
     }
 }
