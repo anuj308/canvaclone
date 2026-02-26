@@ -111,6 +111,7 @@ export const addImageToCanvas = async (canvas,imageUrl)=>{
                 if(image.width > maxDimension || image.height > maxDimension){
                     if(image.width > image.height){
                         const scale = maxDimension/image.width;
+                        image.scale(scale)
                     }else {
                         const scale = maxDimension/image.height;
                         image.scale(scale)

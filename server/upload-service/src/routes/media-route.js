@@ -3,6 +3,7 @@ const express = require('express');
 const multer = require('multer');
 const {uploadMedia, getAllMediasByUser} = require('../controllers/media-controller')
 const authenticatedRequest = require('../middleware/auth-middleware')
+const {generateImageFromAiAndUploadToDb} = require('../controllers/ai-image-controller')
 const router = express.Router();
 
 const upload = multer({
@@ -37,5 +38,6 @@ router.post('/upload',authenticatedRequest,(req,res,next)=>{
 },uploadMedia);
 
 router.get('/get', authenticatedRequest, getAllMediasByUser);
+router.get('/ai-image-generator', authenticatedRequest, generateImageFromAiAndUploadToDb);
 
 module.exports = router;
