@@ -6,15 +6,25 @@ import { Input } from "@/components/ui/input";
 import { useEditorStore } from "@/store";
 import { ChevronDown, Eye, PenIcon, Star, LogOut, Save } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 function Header(){
 
-    const {isEditing, setIsEditing, name, setName} = useEditorStore();
+    const {canvas,isEditing, setIsEditing, name, setName} = useEditorStore();
     const {data:session} = useSession();
 
     const handleLogout = ()=>{
         signOut()
     }
+
+    useEffect(()=>{
+        if(!canvas) return;
+        canvas.selection = isEditing;
+        canvas.getObjects().forEach((obj) => {
+            obj.selection = isEditing;
+            obj.evented = isEditing;
+        });
+    },[isEditing])
     return ( 
         <div className="header-gradient header flex items-center px-4 h-14">
             <div className="flex items-center space-x-2">

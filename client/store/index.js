@@ -19,6 +19,9 @@ export const useEditorStore = create((set,get)=>({
     name : 'Untitled Design',
     setName: (value)=> set({name: value}),
 
+    showProperties: false,
+    setShowProperties: (flag) => set({showProperties: flag}),
+
     resetStore : ()=>{
         set({
             canvas: null,
