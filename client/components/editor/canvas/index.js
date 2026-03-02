@@ -16,6 +16,17 @@ function Canvas(){
     useEffect(()=>{
         const cleanUpCanvas = ()=>{
             if(fabricCanvasRef.current){
+
+                try {
+                    fabricCanvasRef.current.off();
+
+                    fabricCanvasRef.current.off('object:added')
+                    fabricCanvasRef.current.off('object:modified')
+                    fabricCanvasRef.current.off('object:removed')
+                    fabricCanvasRef.current.off('object:created')
+                } catch (error) {
+                    console.error('Error removing event listeners',error)
+                }
                 try {
                     fabricCanvasRef.current.dispose()
                 } catch (error) {
@@ -56,7 +67,15 @@ function Canvas(){
                 // apply custome style for the controls
                 // todo
                 // setup event listeners
-                // todo
+                const handleCanvasChange = ()=>{
+                    // implement auto save and save the canvas data
+                    console.log('Canvas object changed')
+                }
+
+                fabricCanvas.on('object:added',handleCanvasChange)
+                fabricCanvas.on('object:modified',handleCanvasChange)
+                fabricCanvas.on('object:removed',handleCanvasChange)
+                fabricCanvas.on('object:created',handleCanvasChange)
 
             } catch (error) {
                 console.error('Failed to init canvas',error);

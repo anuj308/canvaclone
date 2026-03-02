@@ -202,3 +202,46 @@ export const updateDrawingBrush = (canvas,properties={})=>{
         return false;
     }
 }
+
+export const cloneSelectedObject = async (canvas)=>{
+    if(!canvas) return
+
+    const activeObject = canvas.getActiveObject();
+    if(!activeObject) return;
+
+    try {
+        const clonedObj = await activeObject.clone();
+
+        clonedObj.set({
+            left : activeObject.left + 10,
+            top: activeObject.top + 10,
+            id: `${activeObject.type  || 'Object'}-${Date.now()}`
+        })
+
+        canvas.add(clonedObj);
+        canvas.renderAll();
+
+        return clonedObj;
+    } catch (error) {
+        console.error("Error while cloning",e)
+        return null;
+    }
+}
+
+export const deleteSelectedObject = async (canvas)=>{
+     if(!canvas) return
+
+    const activeObject = canvas.getActiveObject();
+    if(!activeObject) return;
+
+    try {
+        canvas.remove(activeObject);
+        canvas.discardActiveObject()
+        canvas.renderAll();
+
+        return true;
+    } catch (error) {
+        console.error("Error while deleting",e)
+        return false;
+    }
+}
