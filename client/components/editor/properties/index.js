@@ -1,11 +1,15 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import { fontFamilies } from "@/config";
 import { cloneSelectedObject, deleteSelectedObject } from "@/fabric/fabric-utils";
 import { useEditorStore } from "@/store";
-import { Copy, FlipHorizontal, FlipVertical, MoveDown, MoveUp, Trash } from "lucide-react";
+import { Bold, Copy, FlipHorizontal, FlipVertical, Italic, MoveDown, MoveUp, Trash, Underline } from "lucide-react";
 import { useEffect, useState } from "react";
 
 function Properties(){
@@ -13,7 +17,7 @@ function Properties(){
 
     // active object
     const [selectedObject, setSelectedObject] = useState(null);
-    
+    const [objectType,setObjectType] = useState("");
     // common
 
     const [opacity,setOpacity] = useState(10);
@@ -34,6 +38,8 @@ function Properties(){
         fontSize: 24,
         fontFamily: 'Arial',
         fontWeight: 'normal',
+        fontStyle: 'normal',
+        backgroundColor: '#ffffff',
         underline: false,
         textColor: "#000000",
         textBackgroundColor: "",
@@ -52,13 +58,36 @@ function Properties(){
             const activeObject = canvas.getActiveObject();
 
             if(activeObject){
+                console.log(activeObject.type,"active object")
                 setSelectedObject(activeObject);
                 // update commom properties when loaded
                 setOpacity(Math.round(activeObject.opacity*100 || 100));
                 setWidth(Math.round(activeObject.width* activeObject.scaleX));
                 setHeight(Math.round(activeObject.height* activeObject.scaleY));
-            }
 
+                // check based on type
+                if(["i-text", "textbox", "text"].includes(activeObject.type)){
+                    setObjectType("text")
+                    setTextProperties((prev)=>({
+                        ...prev,
+                        text: activeObject.text ?? "",
+                        fontSize: activeObject.fontSize ?? 24,
+                        fontFamily: activeObject.fontFamily ?? "Arial",
+                        fontWeight: activeObject.fontWeight ?? "normal",
+                        fontStyle: activeObject.fontStyle ?? "normal",
+                        underline: Boolean(activeObject.underline),
+                        textColor: activeObject.fill ?? "#000000",
+                        backgroundColor: activeObject.textBackgroundColor ?? "",
+                        letterSpacing: activeObject.charSpacing ?? activeObject.letterSpacing ?? 0,
+                    }))
+                }else if(activeObject.type === "image"){
+                    setObjectType("image")
+                }else if(activeObject.type === "path"){
+                    setObjectType("path")
+                }else {
+                    setObjectType('shape')
+                }
+            }
         }
         const handleSelectionCleared = ()=>{
 
@@ -83,7 +112,7 @@ function Properties(){
         }
     },[])
     const updateObjectProperty = (property,value)=>{
-        console.log(property,value,"update property")
+        // console.log(property,value,"update property")
         if(!canvas || !selectedObject) return;
 
         selectedObject.set(property,value);
@@ -92,7 +121,6 @@ function Properties(){
 
     // opacity
     const handleOpacityChange = (value)=>{
-        // console.log(value)
         const newValue = Number(value[0]);
         setOpacity(newValue);
         updateObjectProperty('opacity',newValue/100);
@@ -104,7 +132,7 @@ function Properties(){
     }
     
     // Delete
-    const handleDelete = ()=>{
+    const handleDelete = ()=>{ 
         if(!canvas || !selectedObject) return;
         deleteSelectedObject(canvas);
     }
@@ -134,12 +162,48 @@ function Properties(){
         const flipY = !selectedObject.flipY;
         updateObjectProperty('flipY',flipY)
     }
-    const textPropertiesChange = (e)=>{
-        const value = e.target.value;
-        const name = e.target.name;
 
-        setTextProperties((prev)=>({ [name]: value, ...prev}))
+    const handleTextPropertiesChange = (e,name)=>{
+        const rawValue = Array.isArray(e)
+            ? e[0]
+            : typeof e === "string"
+                ? e
+                : e?.target?.value;
+        const value = name === "fontSize" || name === "letterSpacing"  ? Number(rawValue) : rawValue;
+
+        const objectPropertyMap = {
+            textColor: "fill",
+            letterSpacing: "charSpacing",
+        };
+        const objectProperty = objectPropertyMap[name] || name;
+
+        setTextProperties((prev)=>({...prev, [name]: value}))
+
+        updateObjectProperty(objectProperty,value)
     }
+
+    const handleTextPropertiesToggle = (name)=>{
+        let nextValue;
+        setTextProperties((prev)=> {
+
+            if (name === "fontWeight") {
+            nextValue = prev.fontWeight === "bold" ? "normal" : "bold";
+            } else if (name === "fontStyle") {
+            nextValue = prev.fontStyle === "italic" ? "normal" : "italic";
+            } else if (name === "underline") {
+            nextValue = !prev.underline;
+            } else {
+            return prev;
+            }
+            
+            return {
+                ...prev,
+                [name]: nextValue
+            }
+        })
+        updateObjectProperty(name,nextValue);
+    }
+    
     return (
         <div className="fixed right-0 top-[56px] bottom-[0px] w-[280px] bg-white border-1 border-gray-200 z-10">
             <div className="flex items-center justify-between p-3 border-b">
@@ -218,6 +282,136 @@ function Properties(){
                     </div>
                 </div>
 
+                {/* text related properties */}
+                {
+                    objectType === "text" && (
+                        <div className="space-y-4 border-t">
+                            <h3 className="text-sm font-medium">Text Properties</h3>
+                            <div className="space-y-2">
+                                <Label className={"text-xs"} htmlFor="text-content">
+                                    Text Content
+                                </Label>
+                                <Textarea
+                                id="text-content"
+                                value={textProperties.text}
+                                onChange={(e)=> handleTextPropertiesChange(e,"text")}
+                                className={"h-20 resize-none"}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className={"text-xs"} htmlFor="font-size">
+                                   Font Size
+                                </Label>
+                                <Input
+                                id="font-size"
+                                type={"Number"}
+                                value={textProperties.fontSize}
+                                onChange={(e)=> handleTextPropertiesChange(e,"fontSize")}
+                                className={"w-16 h-7 text-xs"}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className={"text-sm"} htmlFor="font-family">
+                                   Font Family
+                                </Label>
+                                <Select value={textProperties.fontFamily} onValueChange={(e)=> handleTextPropertiesChange(e,"fontFamily")}>
+                                    <SelectTrigger id="font-family" className={"h-10"}>
+                                        <SelectValue placeholder="Select Font"></SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {
+                                            fontFamilies.map((fontItem)=> (
+                                                <SelectItem key={fontItem} value={fontItem} style={{fontFamily : fontItem}}>
+                                                    {fontItem}
+                                                </SelectItem>
+                                            ))
+                                        }
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className={"text-sm"}>
+                                    Style
+                                </Label>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant={textProperties.fontWeight === "bold" ? "default" : "outline"}
+                                        size="icon"
+                                        onClick={()=> handleTextPropertiesToggle("fontWeight")}
+                                        className={"w-8 h-8"}
+                                    >
+                                        <Bold className="w-4 h-4"/>
+                                    </Button>
+                                    <Button
+                                        variant={textProperties.fontStyle === "italic" ? "default" : "outline"}
+                                        size="icon"
+                                        onClick={()=> handleTextPropertiesToggle("fontStyle")}
+                                        className={"w-8 h-8"}
+                                    >
+                                        <Italic className="w-4 h-4"/>
+                                    </Button>
+                                    <Button
+                                        variant={textProperties.underline ? "default" : "outline"}
+                                        size="icon"
+                                        onClick={()=> handleTextPropertiesToggle("underline")}
+                                        className={"w-8 h-8"}
+                                    >
+                                        <Underline className="w-4 h-4"/>
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="flex justify-between">
+                                 <div className="space-y-2">
+                                <Label htmlFor="text-color" className={"text-sm"}>
+                                    Text Color
+                                </Label>
+                                <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                                    <div className="absolute inset-0"
+                                    style={{backgroundColor: textProperties.textColor}}/>
+                                        <Input
+                                            id="text-color"
+                                            type="color"
+                                            value={textProperties.textColor}
+                                            onChange={(e)=> handleTextPropertiesChange(e,"textColor")}
+                                            className={"absolute inset-0 opacity-0 cursor-point"}
+                                        />
+                                </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="text-bg-color" className={"text-sm"}>
+                                        Text BG Color
+                                    </Label>
+                                    <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                                        <div className="absolute inset-0"
+                                        style={{backgroundColor: textProperties.backgroundColor}}/>
+                                            <Input
+                                                id="text-bg-color"
+                                                type="color"
+                                                value={textProperties.backgroundColor}
+                                                onChange={(e)=> handleTextPropertiesChange(e,"backgroundColor")}
+                                                className={"absolute inset-0 opacity-0 cursor-point"}
+                                            />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <Label className={"text-xs"} htmlFor="letter-spacing">
+                                    Letter Spacing
+                                    </Label>
+                                    <span>{textProperties.letterSpacing}</span>
+                                </div>
+                                <Slider
+                                id="letter-spacing"
+                                min={-200}
+                                max={800}
+                                step={10}
+                                value={[textProperties.letterSpacing]}
+                                onValueChange={(e)=> handleTextPropertiesChange(e,"letterSpacing")}
+                                />
+                            </div>
+
+                        </div>
+                    )
+                }
             </div>
         </div>
     )

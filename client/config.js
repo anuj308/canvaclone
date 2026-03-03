@@ -59,28 +59,28 @@ export const textPresets = [
     text: 'Add a Heading',
     fontSize: 36,
     fontWeight: 'bold',
-    fontFamily: 'Inter, sans-serid'
+    fontFamily: 'Arial, sans-serif'
   },
   {
     name: 'Sub Heading',
     text: 'Add a Sub Heading',
     fontSize: 24,
     fontWeight: 'bold',
-    fontFamily: 'Inter, sans-serid'
+    fontFamily: 'Arial, sans-serif'
   },
   {
     name: 'Body Text',
     text: 'Add a little bit of body text',
     fontSize: 16,
     fontWeight: 'normal',
-    fontFamily: 'Inter, sans-serid'
+    fontFamily: 'Arial, sans-serif'
   },
   {
     name: 'Caption',
     text: 'Add a caption',
     fontSize: 12,
     fontWeight: 'normal',
-    fontFamily: 'Inter, sans-serid',
+    fontFamily: 'Arial, sans-serif',
     fontStyle: 'normal'
   }
 ]
@@ -97,5 +97,14 @@ export const drawingPanelColorPresets = [
   //  // Dark colors "#1A1A2E", "#16213E", "#0F3460", "#533483", "#E94560",
  ];
 
-export const fontFamilies = ["Arial", "Helvetica", "Times New Roman", "Courier New", 
-  "Georgia", "Verdana", "Impact", "Comic Sans MS",];
+export const fontFamilies = [
+  "Arial",
+  "Times New Roman",
+  "Courier New",
+  "Georgia",
+  "Verdana",
+  "serif",
+  "sans-serif",
+  "monospace",
+  "cursive",
+];
