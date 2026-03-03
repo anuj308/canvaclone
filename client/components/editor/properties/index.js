@@ -45,7 +45,24 @@ function Properties(){
         backgroundColor:"#000000",
         borderStyle:"solid",
         borderWidth: 0,
+        filter:"none",
+        blur:0,
     })
+
+    const loadBorderProperties = (activeObject)=>{
+        let borderStyle = "solid";
+        if(Array.isArray(activeObject?.strokeDashArray) && activeObject.strokeDashArray.length){
+            borderStyle = activeObject.strokeDashArray[0] <= 3 ? "dotted" : "dashed";
+        }
+
+        setShapeProperties((prev)=>({
+            ...prev,
+            backgroundColor: activeObject?.fill ?? "#000000",
+            borderColor: activeObject?.stroke ?? "#000000",
+            borderWidth: Number(activeObject?.strokeWidth ?? 0),
+            borderStyle,
+        }))
+    }
     // filter, blur
     // images
 
@@ -81,21 +98,28 @@ function Properties(){
                     }))
                 }else if(activeObject.type === "image"){
                     setObjectType("image")
+                    const imageFilters = activeObject?.filters || [];
+                    const blurFilter = imageFilters.find((item) => item?.type === "Blur");
+                    const has = (name) => imageFilters.some((item) => item?.type === name);
+
+                    let selectedFilter = "none";
+                    if (has("Grayscale")) selectedFilter = "grayscale";
+                    else if (has("Sepia")) selectedFilter = "sepia";
+                    else if (has("Invert")) selectedFilter = "invert";
+                    else if (has("Blur")) selectedFilter = "blur";
+
+                    setShapeProperties((prev) => ({
+                        ...prev,
+                        filter: selectedFilter,
+                        blur: blurFilter ? Math.round((blurFilter.blur || 0) * 100) : 0,
+                    }));
+                    loadBorderProperties(activeObject)
                 }else if(activeObject.type === "path"){
-                    setObjectType("path")
+                    setObjectType("shape")
+                    loadBorderProperties(activeObject)
                 }else {
                     setObjectType('shape')
-                    let borderStyle = "solid";
-                    if(Array.isArray(activeObject.strokeDashArray) && activeObject.strokeDashArray.length){
-                        borderStyle = activeObject.strokeDashArray[0] <= 3 ? "dotted" : "dashed";
-                    }
-                    setShapeProperties((prev)=>({
-                        ...prev,
-                        backgroundColor: activeObject.fill ?? "#000000",
-                        borderColor: activeObject.stroke ?? "#000000",
-                        borderWidth: Number(activeObject.strokeWidth ?? 0),
-                        borderStyle,
-                    }))
+                    loadBorderProperties(activeObject)
                 }
             }
         }
@@ -249,6 +273,66 @@ function Properties(){
             }
         })
         updateObjectProperty(name,nextValue);
+    }
+
+    const handleImageFilterChange = async (value)=>{
+        setShapeProperties((prev)=>({...prev, filter: value}))
+
+        if(!canvas || !selectedObject || selectedObject.type !== 'image') return
+
+        try {
+            canvas.discardActiveObject();
+
+            const {filters} = await import("fabric");
+
+            selectedObject.filters = [];
+
+            switch (value){
+                case 'grayscale':
+                    selectedObject.filters.push(new filters.Grayscale());
+
+                    break;
+                case 'sepia':
+                    selectedObject.filters.push(new filters.Sepia());
+
+                    break;
+                case 'invert':
+                    selectedObject.filters.push(new filters.Invert());
+
+                    break;
+                case 'blur':
+                    selectedObject.filters.push(new filters.Blur({blur : shapeProperties.blur/100}));
+
+                    break;
+                case 'none':
+                default:
+                    break;
+            }
+
+            selectedObject.applyFilters();
+
+            canvas.setActiveObject(selectedObject);
+            canvas.requestRenderAll();
+        } catch (error) {
+            console.error("Falied to change image filter")
+        }
+    }
+
+    const handleBlurChange = async (value)=>{
+        const newBlurValue = value[0]
+        setShapeProperties((prev)=>({...prev, blur: newBlurValue}))
+        if(!canvas || !selectedObject || selectedObject.type !== 'image' || shapeProperties.filter !== "blur") return
+
+        try {
+            const {filters} = await import('fabric');
+            
+            selectedObject.filters = [new filters.Blur({blur: newBlurValue/100})]
+
+            selectedObject.applyFilters();
+            canvas.requestRenderAll();
+        } catch (error) {
+            console.error("Error while applying blur")
+        }
     }
     
     return (
@@ -522,6 +606,94 @@ function Properties(){
                             </div>
 
                         </div>
+                    )
+                }
+                {/* image */}
+                {
+                    objectType === "image" && (
+                         <div className="space-y-4 p-4 border-t">
+                            <h3 className="text-sm font-medium">Shape Properties</h3>
+                            <div className="space-y-2">
+                                <Label htmlFor="border-color" className={'text-xs'}>Border Color</Label>
+                                <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                                    <div className="absolute inset-0"
+                                    style={{borderColor: shapeProperties.borderColor}}/>
+                                        <Input
+                                            id="border-color"
+                                            type="color"
+                                            value={shapeProperties.borderColor}
+                                            onChange={(e)=> handleShapePropertiesChange(e,"borderColor")}
+                                            className={"absolute inset-0 opacity-0 cursor-point"}
+                                        />
+                                </div>
+                            </div>
+                                
+                             <div className="space-y-2">
+                                <Label htmlFor="border-width" className={'text-xs mb-2'}>Border Width</Label>
+                                <span className="text-xs">{shapeProperties.borderWidth}%</span>
+                                <Slider
+                                id="border-width"
+                                min={0}
+                                max={20}
+                                step={1}
+                                value={[shapeProperties.borderWidth]}
+                                onValueChange={(val)=> handleShapePropertiesChange(val,"borderWidth")} 
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="border-style" className={'text-xs'}>Border Style</Label>
+                                <Select value={shapeProperties.borderStyle} onValueChange={(e)=> handleShapePropertiesChange(e,"borderStyle")}>
+                                    <SelectTrigger id="border-style" className={"h-10"}>
+                                        <SelectValue placeholder="Select Border Style"></SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="solid">Solid</SelectItem>
+                                        <SelectItem value="dashed">Dashed</SelectItem>
+                                        <SelectItem value="dotted">Dotted</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="filter" className={'text-xs'}>Filter</Label>
+                                <Select value={shapeProperties.filter} onValueChange={(value)=> handleImageFilterChange(value)}>
+                                    <SelectTrigger id="filter" className={"h-10"}>
+                                        <SelectValue placeholder="Select Image Filter"></SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">None</SelectItem>
+                                        <SelectItem value="grayscale">Grayscale</SelectItem>
+                                        <SelectItem value="sepia">Sepia</SelectItem>
+                                        <SelectItem value="invert">Invert</SelectItem>
+                                        <SelectItem value="blur">Blur</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {
+                                    shapeProperties.filter === 'blur' && (
+                                        <div className="space-y-2">
+                                            {/* <div className="flex justify-between mb-4"> */}
+                                                <Label htmlFor="blur" className={'text-xs'}>Blur Amount</Label>
+                                                <span className="font-medium text-xs">{shapeProperties.blur}%</span>
+                                                <Slider
+                                                id="blur"
+                                                min={0}
+                                                max={20}
+                                                step={1}
+                                                value={[shapeProperties.blur]}
+                                                onValueChange={(val)=> handleBlurChange(val)} 
+                                                />
+                                            {/* </div> */}
+                                        </div>
+                                    )
+                                }
+                            </div>
+                        </div>
+                    )
+                }
+                {/* path */}
+                {
+                    objectType === "path" && (
+                        <div>
+                            </div>
                     )
                 }
             </div>
