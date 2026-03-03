@@ -25,14 +25,6 @@ function Properties(){
     const [height,setHeight] = useState(0);
     
     // text
-    // const [fontSize,setFontSize] = useState(24);
-    // const [fontFamily,setFontFamily] = useState('Arial');
-    // const [fontWeight,setFontWeight] = useState('normal');
-    // const [fontStyle,setFontStyle] = useState('normal');
-    // const [underline,setUnderline] = useState(false);
-    // const [textColor,setTextColor] = useState("#000000");
-    // const [textBackgroundColor,setBackgroundColor] = useState("");
-    // const [letterSpacing,setLetterSpacing] = useState(0);
     const [textProperties,setTextProperties] = useState({
         text: "",
         fontSize: 24,
@@ -47,7 +39,14 @@ function Properties(){
     })
 
     // shapes
-
+    // fillColor,borderColor, borderWidth, borderStyle
+    const [shapeProperties,setShapeProperties] = useState({
+        borderColor:"#000000",
+        backgroundColor:"#000000",
+        borderStyle:"solid",
+        borderWidth: 0,
+    })
+    // filter, blur
     // images
 
     // addtional
@@ -86,6 +85,17 @@ function Properties(){
                     setObjectType("path")
                 }else {
                     setObjectType('shape')
+                    let borderStyle = "solid";
+                    if(Array.isArray(activeObject.strokeDashArray) && activeObject.strokeDashArray.length){
+                        borderStyle = activeObject.strokeDashArray[0] <= 3 ? "dotted" : "dashed";
+                    }
+                    setShapeProperties((prev)=>({
+                        ...prev,
+                        backgroundColor: activeObject.fill ?? "#000000",
+                        borderColor: activeObject.stroke ?? "#000000",
+                        borderWidth: Number(activeObject.strokeWidth ?? 0),
+                        borderStyle,
+                    }))
                 }
             }
         }
@@ -180,6 +190,43 @@ function Properties(){
         setTextProperties((prev)=>({...prev, [name]: value}))
 
         updateObjectProperty(objectProperty,value)
+    }
+
+    const getStrokeDashArray = (style)=>{
+        if(style === "dashed") return [5, 5];
+        if(style === "dotted") return [2, 2];
+        return null;
+    }
+
+    const handleShapePropertiesChange = (e,name)=>{
+        const rawValue = Array.isArray(e)
+            ? e[0]
+            : typeof e === "string"
+                ? e
+                : e?.target?.value;
+
+        if(!canvas || !selectedObject) return;
+
+        const objectPropertyMap = {
+            backgroundColor: "fill",
+            borderColor: "stroke",
+            borderWidth: "strokeWidth",
+            borderStyle: "strokeDashArray",
+        };
+
+        const valueTransformMap = {
+            borderWidth: (value)=> Number(value),
+            borderStyle: (value)=> getStrokeDashArray(value),
+        };
+
+        const value = valueTransformMap[name]
+            ? valueTransformMap[name](rawValue)
+            : rawValue;
+
+        const objectProperty = objectPropertyMap[name] || name;
+
+        setShapeProperties((prev)=>({...prev, [name]: rawValue}))
+        updateObjectProperty(objectProperty, value)
     }
 
     const handleTextPropertiesToggle = (name)=>{
@@ -407,6 +454,71 @@ function Properties(){
                                 value={[textProperties.letterSpacing]}
                                 onValueChange={(e)=> handleTextPropertiesChange(e,"letterSpacing")}
                                 />
+                            </div>
+
+                        </div>
+                    )
+                }
+
+                {/* shape */}
+                {
+                    objectType === "shape" && (
+                        <div className="space-y-4 p-4 border-t">
+                            <h3 className="text-sm font-medium">Shape Properties</h3>
+                            <div className="flex justify-between">
+                                 <div className="space-y-2">
+                                    <Label htmlFor="fill-color" className={'text-xs'}>Fill Color</Label>
+                                    <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                                        <div className="absolute inset-0"
+                                        style={{backgroundColor: shapeProperties.backgroundColor}}/>
+                                            <Input
+                                                id="fill-color"
+                                                type="color"
+                                                value={shapeProperties.backgroundColor}
+                                                onChange={(e)=> handleShapePropertiesChange(e,"backgroundColor")} 
+                                                className={"absolute inset-0 opacity-0 cursor-point"}
+                                            />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="border-color" className={'text-xs'}>Border Color</Label>
+                                    <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                                        <div className="absolute inset-0"
+                                        style={{borderColor: shapeProperties.borderColor}}/>
+                                            <Input
+                                                id="border-color"
+                                                type="color"
+                                                value={shapeProperties.borderColor}
+                                                onChange={(e)=> handleShapePropertiesChange(e,"borderColor")}
+                                                className={"absolute inset-0 opacity-0 cursor-point"}
+                                            />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="border-width" className={'text-xs mb-2'}>Border Width</Label>
+                                <span className="text-xs">{shapeProperties.borderWidth}%</span>
+                                <Slider
+                                id="border-width"
+                                min={0}
+                                max={20}
+                                step={1}
+                                value={[shapeProperties.borderWidth]}
+                                onValueChange={(val)=> handleShapePropertiesChange(val,"borderWidth")} 
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="border-style" className={'text-xs'}>Border Style</Label>
+                                <Select value={shapeProperties.borderStyle} onValueChange={(e)=> handleShapePropertiesChange(e,"borderStyle")}>
+                                    <SelectTrigger id="border-style" className={"h-10"}>
+                                        <SelectValue placeholder="Select Border Style"></SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="solid">Solid</SelectItem>
+                                        <SelectItem value="dashed">Dashed</SelectItem>
+                                        <SelectItem value="dotted">Dotted</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                         </div>
