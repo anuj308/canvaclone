@@ -4,11 +4,20 @@ import axios from 'axios';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:5000'
 
 export async function fetchWithAuth(endpoint,options={}){
+    let session = null;
 
-    const session = await getSession();
+    try {
+        session = await getSession();
+    } catch (error) {
+        console.error('Failed to resolve session:', error);
+    }
 
-    if(!session){
-        throw new Error('Not authenticated')
+    if(!session?.idToken){
+        return {
+            success: false,
+            message: 'Not authenticated',
+            status: 401
+        };
     }
 
     try {
