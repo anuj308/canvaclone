@@ -36,7 +36,7 @@ const colorPresets = [
 
 function SettingsPanel(){
     const [backgroundColor,setBackgroundColor] = useState('#ffffff')
-    const {canvas} = useEditorStore()
+    const {canvas,markAsModified} = useEditorStore()
     const handleColorChange = (event)=>{
         setBackgroundColor(event.target.value)
     }
@@ -51,6 +51,7 @@ function SettingsPanel(){
         canvas.renderAll();
 
         centerCanvas(canvas);
+        markAsModified();
     }
     return (
         <div className="p-4 space-y-6">

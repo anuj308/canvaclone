@@ -1,7 +1,7 @@
 'use client'
 
 import { useEditorStore } from "@/store";
-import { initializeFabric } from "@/fabric/fabric-utils";
+import { customizeBoundingBox, initializeFabric } from "@/fabric/fabric-utils";
 import { useEffect, useRef } from "react";
 
 function Canvas(){
@@ -11,7 +11,7 @@ function Canvas(){
     const fabricCanvasRef = useRef(null);
     const initAttemptedRef = useRef(null);
 
-    const {setCanvas} = useEditorStore();
+    const {setCanvas,markAsModified} = useEditorStore();
 
     useEffect(()=>{
         const cleanUpCanvas = ()=>{
@@ -65,10 +65,11 @@ function Canvas(){
                 console.log('Canvas init is done and set in store');
 
                 // apply custome style for the controls
-                // todo
+                customizeBoundingBox(fabricCanvas);
                 // setup event listeners
                 const handleCanvasChange = ()=>{
                     // implement auto save and save the canvas data
+                    markAsModified();
                     console.log('Canvas object changed')
                 }
 

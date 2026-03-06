@@ -4,14 +4,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { useEditorStore } from "@/store";
-import { ChevronDown, Eye, PenIcon, Star, LogOut, Save, Download } from "lucide-react";
+import { ChevronDown, Eye, PenIcon, Star, LogOut, Save, Download, Loader2 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import ExportModal from "../export";
 
 function Header(){
 
-    const {canvas,isEditing, setIsEditing, name, setName} = useEditorStore();
+    const {canvas,isEditing, setIsEditing, name, setName,saveStatus,markAsModified,designId} = useEditorStore();
     const {data:session} = useSession();
     const [showExportModal,setShowExportModal] = useState(false);
     const handleLogout = ()=>{
@@ -26,6 +26,11 @@ function Header(){
             obj.evented = isEditing;
         });
     },[isEditing])
+
+    useEffect(()=>{
+        if(!canvas || !designId) return;
+        markAsModified();
+    },[name,canvas,designId])
     return ( 
         <div className="header-gradient header flex items-center px-4 h-14">
             <div className="flex items-center space-x-2">
@@ -48,9 +53,13 @@ function Header(){
                     </DropdownMenuContent>
                 </DropdownMenu>
                 <button className="header-button ml-3 relative" title="Save">
-                    <Save className="w-5 h-5"/>
+                    {
+                        saveStatus === 'Saving...' ? (
+                            <Loader2 className="w-5 h-5"/>
+                        ) : (<Save className="w-5 h-5"/>)
+                    }
                 </button>
-                <button onClick={()=> setShowExportModal(true)} className="header-button ml-3 relative" title="Save">
+                <button onClick={()=> setShowExportModal(true)} className="header-button ml-3 relative" title="Export">
                     <Download  className="w-5 h-5"/>
                 </button>
             </div>

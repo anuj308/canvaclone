@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useEditorStore } from "@/store";
 import { getUserDesignById } from "@/services/design-service";
 import Properties from "./properties";
+import { centerCanvas } from "@/fabric/fabric-utils";
 
 function MainEditor(){
     const params = useParams();
@@ -18,7 +19,7 @@ function MainEditor(){
     const [loadAttempted,setLoadAttempted] = useState(false);
     const [error,setError] = useState(null);
 
-    const {canvas,setDesignId,resetStore,setShowProperties,showProperties,isEditing} = useEditorStore()
+    const {canvas,setDesignId,resetStore,setShowProperties,showProperties,isEditing,setName} = useEditorStore()
 
     useEffect(()=>{
         // reset the store and set the design id
@@ -65,7 +66,7 @@ function MainEditor(){
 
             if(design){
                 // update name
-                // todo
+                setName(design.name || 'Untitled Design');
 
                 // set design id just incase after getting the data
                 setDesignId(designId);
@@ -78,6 +79,7 @@ function MainEditor(){
                                 width : design.width,
                                 height :  design.height
                             })
+                            centerCanvas(canvas);
                         }
 
                         const canvasData = typeof design.canvasData === 'string' ? JSON.parse(design.canvasData) : design.canvasData
@@ -104,6 +106,7 @@ function MainEditor(){
                             width: design.width,
                             height: design.height
                         });
+                        centerCanvas(canvas);
                         canvas.backgroundColor="#ffffff"
                         canvas.renderAll()
                     }
@@ -121,7 +124,7 @@ function MainEditor(){
             setError("Failed to load design");
             setIsLoading(false);
         }
-    },[canvas,designId, loadAttempted, setDesignId])
+    },[canvas,designId, loadAttempted, setDesignId, setName])
 
     useEffect(()=>{
         if(designId && canvas && !loadAttempted){

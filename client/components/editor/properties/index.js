@@ -13,7 +13,7 @@ import { Bold, Copy, FlipHorizontal, FlipVertical, Italic, MoveDown, MoveUp, Tra
 import { useEffect, useState } from "react";
 
 function Properties(){
-    const {canvas} = useEditorStore();
+    const {canvas,markAsModified} = useEditorStore();
 
     // active object
     const [selectedObject, setSelectedObject] = useState(null);
@@ -151,6 +151,7 @@ function Properties(){
 
         selectedObject.set(property,value);
         canvas.renderAll();
+        markAsModified();
     }
 
     // opacity
@@ -163,12 +164,14 @@ function Properties(){
     const handleDuplicate = async ()=>{
         if(!canvas || !selectedObject) return;
         await cloneSelectedObject(canvas)
+        markAsModified();
     }
     
     // Delete
     const handleDelete = ()=>{ 
         if(!canvas || !selectedObject) return;
         deleteSelectedObject(canvas);
+        markAsModified();
     }
     
     // arrangement
@@ -176,11 +179,13 @@ function Properties(){
         if(!canvas || !selectedObject) return;
         canvas.bringObjectToFront(selectedObject);
         canvas.renderAll();
+        markAsModified();
     }
     const handleSendToBack =  ()=>{
         if(!canvas || !selectedObject) return;
         canvas.sendObjectToBack(selectedObject);
         canvas.renderAll();
+        markAsModified();
     }
     
     // FLip H & Flip V
@@ -313,6 +318,8 @@ function Properties(){
 
             canvas.setActiveObject(selectedObject);
             canvas.requestRenderAll();
+            markAsModified();
+
         } catch (error) {
             console.error("Falied to change image filter")
         }
@@ -330,6 +337,7 @@ function Properties(){
 
             selectedObject.applyFilters();
             canvas.requestRenderAll();
+            markAsModified();
         } catch (error) {
             console.error("Error while applying blur")
         }

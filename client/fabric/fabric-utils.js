@@ -27,7 +27,9 @@ export const centerCanvas = (canvas)=>{
 
     const canvasWrapper = canvas.wrapperEl;
 
-    canvasWrapper.style.width = `${canvas.width}`;
+    canvasWrapper.style.width = `${canvas.width}px`;
+    canvasWrapper.style.height = `${canvas.height}px`;
+    canvasWrapper.style.position = "absolute";
     canvasWrapper.style.top = "50%";
     canvasWrapper.style.left = "50%";
     canvasWrapper.style.transform = "translate(-50%,-50%)";
@@ -243,5 +245,37 @@ export const deleteSelectedObject = async (canvas)=>{
     } catch (error) {
         console.error("Error while deleting",e)
         return false;
+    }
+}
+
+export const customizeBoundingBox = (canvas)=>{
+    if(!canvas) return;
+
+    try {
+        canvas.on('object:added', (e)=>{
+            if(e.target){
+                e.target.set({
+                    borderColor: '#2196f3',
+                    cornerColor: '#ffffff',
+                    cornerStrokeColor: '#2196f3',
+                    cornerSize: 10,
+                    transparentCorners: false,
+                })
+            }
+        })
+
+        canvas.getObjects().forEach(obj=>{
+            obj.set({
+                borderColor: '#2196f3',
+                cornerColor: '#ffffff',
+                cornerStrokeColor: '#2196f3',
+                cornerSize: 10,
+                transparentCorners: false,
+        })
+        })
+
+        canvas.renderAll();
+    } catch (error) {
+        console.error("Failed to customise bounding box");
     }
 }
