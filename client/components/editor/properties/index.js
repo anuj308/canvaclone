@@ -115,7 +115,7 @@ function Properties(){
                     }));
                     loadBorderProperties(activeObject)
                 }else if(activeObject.type === "path"){
-                    setObjectType("shape")
+                    setObjectType("path")
                     loadBorderProperties(activeObject)
                 }else {
                     setObjectType('shape')
@@ -692,8 +692,49 @@ function Properties(){
                 {/* path */}
                 {
                     objectType === "path" && (
-                        <div>
+                         <div className="space-y-4 p-4 border-t">
+                            <h3 className="text-sm font-medium">Path Properties</h3>
+                            <div className="space-y-2">
+                                <Label htmlFor="border-color" className={'text-xs'}>Border Color</Label>
+                                <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                                    <div className="absolute inset-0"
+                                    style={{borderColor: shapeProperties.borderColor}}/>
+                                        <Input
+                                            id="border-color"
+                                            type="color"
+                                            value={shapeProperties.borderColor}
+                                            onChange={(e)=> handleShapePropertiesChange(e,"borderColor")}
+                                            className={"absolute inset-0 opacity-0 cursor-point"}
+                                        />
+                                </div>
                             </div>
+                                
+                             <div className="space-y-2">
+                                <Label htmlFor="border-width" className={'text-xs mb-2'}>Border Width</Label>
+                                <span className="text-xs">{shapeProperties.borderWidth}%</span>
+                                <Slider
+                                id="border-width"
+                                min={0}
+                                max={20}
+                                step={1}
+                                value={[shapeProperties.borderWidth]}
+                                onValueChange={(val)=> handleShapePropertiesChange(val,"borderWidth")} 
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="border-style" className={'text-xs'}>Border Style</Label>
+                                <Select value={shapeProperties.borderStyle} onValueChange={(e)=> handleShapePropertiesChange(e,"borderStyle")}>
+                                    <SelectTrigger id="border-style" className={"h-10"}>
+                                        <SelectValue placeholder="Select Border Style"></SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="solid">Solid</SelectItem>
+                                        <SelectItem value="dashed">Dashed</SelectItem>
+                                        <SelectItem value="dotted">Dotted</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
                     )
                 }
             </div>
