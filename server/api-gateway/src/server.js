@@ -35,17 +35,26 @@ app.use((req, res, next) => {
 });
 
 app.use(helmet());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // proxy options
 const proxyOptions = {
     proxyReqPathResolver : (req)=>{
         return req.originalUrl.replace(/^\/v1/,'/api')
     },
+  proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+    if (srcReq.user) {
+      proxyReqOpts.headers['x-user-id'] = srcReq.user.userId;
+      proxyReqOpts.headers['x-user-email'] = srcReq.user.email;
+      proxyReqOpts.headers['x-user-name'] = srcReq.user.name;
+    }
+    return proxyReqOpts;
+  },
     proxyErrorHandler: (err,res,next)=>{
-        res.status(500).json({
-            message: "Internal server error!",
+    console.error('Proxy error:', err.message)
+    res.status(502).json({
+      message: "Upstream service error",
             error: err.message,
         })
     }
