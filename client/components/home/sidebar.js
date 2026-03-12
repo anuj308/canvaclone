@@ -2,14 +2,20 @@
 import Link from "next/link";
 import {Plus,Home,FolderOpen,CreditCard} from "lucide-react"
 import { useRouter } from 'next/navigation';
-import { saveDesign } from '@/services/design-service';
+import { useState } from 'react';
+import { saveDesign, warmUpDesignService } from '@/services/design-service';
 
 function SideBar(){
     const router = useRouter();
+    const [isCreating,setIsCreating] = useState(false);
 
     const handhandeCreateNewDesign = async ()=>{
+        if(isCreating) return;
 
         try {
+            setIsCreating(true);
+            await warmUpDesignService(2);
+
             const initalDesignData = {
                 name: 'Untitled design - Youtube Thumbnail',
                 canvasData: null,
@@ -28,16 +34,18 @@ function SideBar(){
 
         } catch (error) {
             console.log(error)
+        } finally {
+            setIsCreating(false);
         }
     }
 
     return <aside className="w-[72px] bg-[#f8f8fc] border-r flex flex-col items-center py-4 fixed left-0 top-0 h-full z-10">
         <div onClick={handhandeCreateNewDesign} className="flex flex-col items-center">
-            <button className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white hover:bg-purple-700 transition-colors">
+            <button disabled={isCreating} className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white hover:bg-purple-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
                 <Plus className="w-6 h-6"/>
             </button>
             <div  className="text-xs font-medium text-center mt-1 text-gray-700">
-                Create
+                {isCreating ? 'Starting...' : 'Create'}
             </div>
         </div>
         <nav className="mt-8 flex flex-col items-center space-y-6 w-full">

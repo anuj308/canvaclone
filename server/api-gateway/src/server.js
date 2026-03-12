@@ -38,6 +38,13 @@ app.use(helmet());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'API gateway is awake',
+  });
+});
+
 // proxy options
 const proxyOptions = {
     proxyReqPathResolver : (req)=>{

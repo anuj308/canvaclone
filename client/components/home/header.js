@@ -3,12 +3,22 @@
 import { LogOut, Search } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
+import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { warmUpDesignService } from "@/services/design-service";
 
 function Header(){
-    const {data:session} = useSession();
+    const {data:session, status} = useSession();
+
+    useEffect(() => {
+        if (status !== 'authenticated') return;
+
+        warmUpDesignService(2).catch((error) => {
+            console.error('Failed to warm design service', error);
+        });
+    }, [status]);
     
     const handleLogout = async ()=>{
         await signOut();

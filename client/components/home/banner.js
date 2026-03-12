@@ -4,11 +4,12 @@ import {Button} from '@/components/ui/button';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Crown } from 'lucide-react';
-import { saveDesign } from '@/services/design-service';
+import { saveDesign, warmUpDesignService } from '@/services/design-service';
 
 function Banner(){
 
     const [loading, setLoading]= useState(false);
+    const [statusMessage, setStatusMessage] = useState('');
     const router = useRouter();
 
     const handhandeCreateNewDesign = async ()=>{
@@ -16,6 +17,9 @@ function Banner(){
         if(loading) return
         try {
             setLoading(true);
+            setStatusMessage('Waking backend services...');
+            await warmUpDesignService(2);
+            setStatusMessage('Creating your design...');
             
             const initalDesignData = {
                 name: 'Untitled design - Youtube Thumbnail',
@@ -30,6 +34,7 @@ function Banner(){
             if(newDesign?.success){
                 router.push(`/editor/${newDesign?.data._id}`)
                 setLoading(false);
+                setStatusMessage('');
             } else {
                 throw new Error('Failed to create new design')
             }
@@ -37,6 +42,7 @@ function Banner(){
         } catch (error) {
             console.log(error)
             setLoading(false);
+            setStatusMessage('Backend is still starting. Please retry in a few seconds.');
         }
     }
 
@@ -50,6 +56,7 @@ function Banner(){
             <Button onClick={handhandeCreateNewDesign} className="text-[#8b3dff] bg-white hover:bg-gray-100 rounded-lg px-4 py-2 sm:px-6 sm:py-2.5">
                 {loading ? 'Creating...' : 'Start Designing'}
             </Button>
+            {!!statusMessage && <p className="mt-3 text-xs sm:text-sm text-white/90">{statusMessage}</p>}
         </div>
     );
 }

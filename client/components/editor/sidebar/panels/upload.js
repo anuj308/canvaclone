@@ -15,6 +15,7 @@ function UploadPanel(){
     
     const [isUploading,setIsUploading] = useState(false);
     const [isLoading,setIsLoading] = useState(false);
+    const [showWakeMessage,setShowWakeMessage] = useState(false);
     const [userUploads,setUserUploads] = useState([]);
     
     const {data: session, status} = useSession();
@@ -36,6 +37,19 @@ function UploadPanel(){
     useEffect(() => {
         fetchUserUploads();
     }, [fetchUserUploads]);
+
+    useEffect(() => {
+        if (!isLoading && !isUploading) {
+            setShowWakeMessage(false);
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            setShowWakeMessage(true);
+        }, 6000);
+
+        return () => clearTimeout(timer);
+    }, [isLoading, isUploading]);
 
     const handleFileUpload = async(e)=>{
         const file = e.target.files?.[0];
@@ -82,7 +96,12 @@ function UploadPanel(){
                 {isLoading ? (
                     <div className="border p-6 flex rounded-md items-center justify-center">
                         <Loader2 className="w-4 h-4 animate-spin"/>
-                        <p className="font-bold text-sm">Loading your uploads...</p>
+                        <div className="ml-2">
+                            <p className="font-bold text-sm">Loading your uploads...</p>
+                            {showWakeMessage && (
+                                <p className="text-xs text-gray-500 mt-1">Backend is waking up after idle. This may take up to 60 seconds.</p>
+                            )}
+                        </div>
                     </div>
                 ) : userUploads.length > 0 ? (
                     <div className="grid grid-cols-3 gap-4">
