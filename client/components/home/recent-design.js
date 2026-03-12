@@ -1,6 +1,6 @@
 "use client"
 
-import { getUserDesigns, warmUpDesignService } from "@/services/design-service"
+import { getUserDesigns } from "@/services/design-service"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react"
 import DesignPreview from "./design-preview";
@@ -19,8 +19,6 @@ function RecentDesigns(){
             setIsLoading(true);
             setErrorMessage("");
             setIsWakingBackend(true);
-
-            await warmUpDesignService(2);
 
             const result = await getUserDesigns();
             if(result?.success) setUserDesigns(result?.data || []);
@@ -43,9 +41,14 @@ function RecentDesigns(){
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5  md:gap-4">
                 {
                     isLoading && (
-                        <p className="text-sm text-gray-600 col-span-full">
-                            {isWakingBackend ? 'Waking backend services. This can take up to 60 seconds on free tier...' : 'Loading your designs...'}
-                        </p>
+                        <div className="col-span-full space-y-1">
+                            <p className="text-sm font-semibold text-gray-700">
+                                {isWakingBackend ? 'Fetching your designs...' : 'Loading your designs...'}
+                            </p>
+                            {isWakingBackend && (
+                                <p className="text-xs text-gray-500">Our servers are starting up after a period of inactivity. This can take a moment — your designs will load automatically.</p>
+                            )}
+                        </div>
                     )
                 }
                 {

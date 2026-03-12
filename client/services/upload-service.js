@@ -4,6 +4,11 @@ import { fetchWithAuth } from "./base-service";
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:5000'
+const RETRYABLE_STATUS_CODES = new Set([429, 502, 503, 504]);
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export async function uploadFileWithAuth(file,metaData={}){
     const session = await getSession();
@@ -19,18 +24,29 @@ export async function uploadFileWithAuth(file,metaData={}){
         formData.append(key,value)
     })
 
-    try {
-        const response = await axios.post(`${API_URL}/v1/media/upload`, formData, {
-            headers: {
-                Authorization: `Bearer ${session.idToken}`,
-                "Content-Type": 'multipart/form-data'
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            const response = await axios.post(`${API_URL}/v1/media/upload`, formData, {
+                headers: {
+                    Authorization: `Bearer ${session.idToken}`,
+                    "Content-Type": 'multipart/form-data'
+                },
+                timeout: 120000,
+            });
+
+            return response.data;
+
+        } catch (error) {
+            const statusCode = error?.response?.status;
+            const shouldRetry = RETRYABLE_STATUS_CODES.has(statusCode) && attempt < 3;
+
+            if (shouldRetry) {
+                await sleep(1200 * attempt);
+                continue;
             }
-        });
 
-        return response.data;
-
-    } catch (error) {
-        throw new Error(error?.response?.data?.message || 'Upload Failed')
+            throw new Error(error?.response?.data?.message || 'Upload Failed')
+        }
     }
 }
 

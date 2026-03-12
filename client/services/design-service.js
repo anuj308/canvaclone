@@ -6,13 +6,14 @@ const DESIGN_SERVICE_URL = process.env.NEXT_PUBLIC_DESIGN_SERVICE_URL || '';
 let warmupPromise = null;
 let gatewayWarmupPromise = null;
 let publicDesignWarmupPromise = null;
+let servicesAwake = false;
 
 function wait(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function warmUpApiGateway(options = {}) {
-    if (gatewayWarmupPromise) {
+    if (servicesAwake || gatewayWarmupPromise) {
         return gatewayWarmupPromise;
     }
 
@@ -31,7 +32,7 @@ export async function warmUpPublicDesignService(options = {}) {
         return null;
     }
 
-    if (publicDesignWarmupPromise) {
+    if (servicesAwake || publicDesignWarmupPromise) {
         return publicDesignWarmupPromise;
     }
 
@@ -54,6 +55,8 @@ export async function warmUpPublicServices(options = {}) {
 }
 
 export async function warmUpDesignService(maxAttempts = 2) {
+    if (servicesAwake) return;
+
     if (warmupPromise) {
         return warmupPromise;
     }
@@ -70,6 +73,7 @@ export async function warmUpDesignService(maxAttempts = 2) {
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 const response = await getUserDesigns();
+                servicesAwake = true;
                 return response;
             } catch (error) {
                 lastError = error;

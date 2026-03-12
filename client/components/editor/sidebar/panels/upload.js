@@ -17,6 +17,7 @@ function UploadPanel(){
     const [isLoading,setIsLoading] = useState(false);
     const [showWakeMessage,setShowWakeMessage] = useState(false);
     const [userUploads,setUserUploads] = useState([]);
+    const [loadError,setLoadError] = useState('');
     
     const {data: session, status} = useSession();
     
@@ -25,10 +26,12 @@ function UploadPanel(){
         
         try {
             setIsLoading(true);
+            setLoadError('');
             const data = await fetchWithAuth('/v1/media/get');
             setUserUploads(data?.data || []);
         } catch (error) {
             console.error(error);
+            setLoadError(error?.message || 'Unable to load uploads right now.');
         } finally{
             setIsLoading(false);
         }
@@ -46,7 +49,7 @@ function UploadPanel(){
 
         const timer = setTimeout(() => {
             setShowWakeMessage(true);
-        }, 6000);
+        }, 8000);
 
         return () => clearTimeout(timer);
     }, [isLoading, isUploading]);
@@ -94,14 +97,29 @@ function UploadPanel(){
             <div className="mt-5">
                 <h4 className="text-sm text-gray-500 mb-5">Your Uploads</h4>
                 {isLoading ? (
-                    <div className="border p-6 flex rounded-md items-center justify-center">
-                        <Loader2 className="w-4 h-4 animate-spin"/>
-                        <div className="ml-2">
+                    <div className="border p-6 flex flex-col rounded-md items-center justify-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin text-purple-600"/>
                             <p className="font-bold text-sm">Loading your uploads...</p>
-                            {showWakeMessage && (
-                                <p className="text-xs text-gray-500 mt-1">Backend is waking up after idle. This may take up to 60 seconds.</p>
-                            )}
                         </div>
+                        {showWakeMessage && (
+                            <div className="text-center">
+                                <p className="text-xs font-semibold text-purple-700">Taking longer than usual</p>
+                                <p className="text-xs text-gray-500 mt-1">Our servers are starting up after a period of inactivity. Your uploads will appear shortly — hang tight!</p>
+                            </div>
+                        )}
+                    </div>
+                ) : loadError ? (
+                    <div className="border p-5 rounded-md text-center">
+                        <p className="text-sm font-semibold text-amber-700">Couldn’t load uploads yet</p>
+                        <p className="text-xs text-gray-500 mt-1">The service is still starting. Please try again in a moment.</p>
+                        <button
+                            type="button"
+                            onClick={fetchUserUploads}
+                            className="text-sm text-purple-700 font-semibold mt-3"
+                        >
+                            Retry
+                        </button>
                     </div>
                 ) : userUploads.length > 0 ? (
                     <div className="grid grid-cols-3 gap-4">
