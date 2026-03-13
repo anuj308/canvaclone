@@ -1,6 +1,7 @@
 'use client' 
 import Image from "next/image"
 import LoginCard from "@/components/login/login-card"
+import { Suspense } from "react"
 
 const Login = () => {
   return (
@@ -20,7 +21,9 @@ const Login = () => {
                         
           </div>
           <div className="relative z-10 flex items-center justify-center min-h-screen">
-            <LoginCard/>
+            <Suspense fallback={null}>
+              <LoginCard/>
+            </Suspense>
           </div>
         </div>
       </div>
