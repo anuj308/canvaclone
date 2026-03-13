@@ -3,11 +3,20 @@ import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import {signIn} from "next-auth/react"
 import { warmUpPublicServices } from "@/services/design-service";
+import { useSearchParams } from "next/navigation";
 
 const LoginCard = () => {
+  const searchParams = useSearchParams();
+
   const handleContinueWithGoogle = () => {
     warmUpPublicServices({ keepalive: true }).catch(() => null);
-    signIn("google",{callbackUrl: "/"});
+
+    const forceConsent = searchParams.get("consent") === "1";
+    const authorizationParams = forceConsent
+      ? { access_type: "offline", prompt: "consent" }
+      : { access_type: "offline" };
+
+    signIn("google", { callbackUrl: "/" }, authorizationParams);
   };
 
   return (
