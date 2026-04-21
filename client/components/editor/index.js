@@ -9,6 +9,7 @@ import { useEditorStore } from "@/store";
 import { getUserDesignById } from "@/services/design-service";
 import Properties from "./properties";
 import { centerCanvas } from "@/fabric/fabric-utils";
+import BottomBar from "./bottom-bar";
 
 function MainEditor(){
     const params = useParams();
@@ -169,6 +170,7 @@ function MainEditor(){
                     <main className="flex-1 overflow-hidden bg-[#f0f0f0] flex items-center justify-center">
                         <Canvas/>
                     </main>
+                    <BottomBar/>
                 </div>
             </div>        
             {showProperties && isEditing && <Properties/>}    
