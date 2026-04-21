@@ -54,3 +54,168 @@ This project demonstrates end-to-end product development across frontend, backen
 ## Notes
 
 This project was developed as a guided build inspired by a long-form YouTube implementation and expanded into a complete, portfolio-ready full-stack system.
+
+## Repository Structure
+
+- `client/` - Next.js frontend (recommended deployment: Vercel)
+- `server/` - Node.js microservices, API gateway, Nginx, Docker Compose
+
+## Running the Project
+
+You can run this project in two common modes:
+
+1. Frontend local + backend local Docker (development)
+2. Frontend on Vercel + backend on a server via Docker (production-style)
+
+---
+
+## Backend (Docker)
+
+All backend container files are inside `server/`:
+
+- `server/docker-compose.dev.yml` - development stack (includes local MongoDB)
+- `server/docker-compose.yml` - server/deployment stack (uses cloud MongoDB)
+- `server/nginx/default.conf` - reverse proxy to API Gateway
+- `server/.env.dev.example` - sample env for dev compose
+- `server/.env.example` - sample env for server compose
+
+### 1) Development backend (with local MongoDB)
+
+From project root:
+
+```bash
+cd server
+cp .env.dev.example .env.dev
+docker compose -f docker-compose.dev.yml --env-file .env.dev up -d --build
+```
+
+Backend entrypoint:
+
+- Nginx/API URL: `http://localhost:8080`
+
+Stop:
+
+```bash
+docker compose -f docker-compose.dev.yml --env-file .env.dev down
+```
+
+### 2) Server/deployment backend (with cloud MongoDB)
+
+From project root:
+
+```bash
+cd server
+cp .env.example .env
+# fill required values in .env
+docker compose -f docker-compose.yml up -d --build
+```
+
+Stop:
+
+```bash
+docker compose -f docker-compose.yml down
+```
+
+## Required Backend Environment Variables
+
+In `server/.env` (or `.env.dev`), configure:
+
+- `MONGO_URI` - cloud MongoDB connection string (required for server compose)
+- `GOOGLE_CLIENT_ID` - used by gateway token verification
+- `GOOGLE_CLIENT_SECRET` - included for auth configuration completeness
+- `CORS_ORIGINS` - comma-separated frontend origins
+- `STABILITY_API_KEY` - AI image generation key
+- `cloud_name` - Cloudinary cloud name
+- `api_key` - Cloudinary API key
+- `api_secret` - Cloudinary API secret
+
+## Backend Service Ports (inside Docker network)
+
+- API Gateway: `5000`
+- Design Service: `5001`
+- Upload Service: `5002`
+- Subscription Service: `5003`
+- Nginx public entrypoint: `8080 -> 80`
+
+---
+
+## Frontend (Next.js)
+
+From project root:
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+Frontend URL:
+
+- `http://localhost:3000`
+
+### Frontend API URL Switching
+
+Frontend API resolution supports local and Docker gateway modes via `client/.env.local`:
+
+- `NEXT_PUBLIC_API_MODE=local` uses `NEXT_PUBLIC_LOCAL_API_URL`
+- `NEXT_PUBLIC_API_MODE=docker` uses `NEXT_PUBLIC_DOCKER_API_URL`
+- `NEXT_PUBLIC_API_URL` overrides both when set (useful for deployed backend)
+
+Default local values:
+
+- `NEXT_PUBLIC_LOCAL_API_URL=http://localhost:5000`
+- `NEXT_PUBLIC_DOCKER_API_URL=http://localhost:8080`
+
+Recommended for Docker backend + local frontend:
+
+- `NEXT_PUBLIC_API_MODE=docker`
+
+---
+
+## Recommended Deployment Pattern
+
+- Deploy `client/` on Vercel.
+- Deploy `server/` on a VM/container host using Docker Compose.
+- Point frontend API env (`NEXT_PUBLIC_API_URL`) to your deployed backend gateway domain.
+- Set `CORS_ORIGINS` in backend to include your Vercel domain.
+
+Example:
+
+- Frontend: `https://your-app.vercel.app`
+- Backend Gateway: `https://api.yourdomain.com`
+- Backend `CORS_ORIGINS=https://your-app.vercel.app`
+- Frontend `NEXT_PUBLIC_API_URL=https://api.yourdomain.com`
+
+---
+
+## Health Check
+
+After backend is up:
+
+```bash
+curl http://localhost:8080/health
+```
+
+Expected response: JSON with gateway health status.
+
+## Useful Docker Commands
+
+From `server/`:
+
+```bash
+# See running containers
+docker compose ps
+
+# Follow logs
+docker compose logs -f
+
+# Rebuild and restart
+docker compose up -d --build
+```
+
+## Troubleshooting
+
+- If frontend gets CORS errors, update `CORS_ORIGINS` in backend env.
+- If auth fails, verify `GOOGLE_CLIENT_ID` matches the token issuer app.
+- If upload/AI routes fail, verify Cloudinary and Stability keys.
+- If compose warns `MONGO_URI` is empty, fill it in `.env` before running.
