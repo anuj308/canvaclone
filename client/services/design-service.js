@@ -1,7 +1,5 @@
 import { fetchWithAuth } from "./base-service";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:5000';
-const DESIGN_SERVICE_URL = process.env.NEXT_PUBLIC_DESIGN_SERVICE_URL || '';
+import { API_URL, DESIGN_SERVICE_URL } from "./api-config";
 
 let warmupPromise = null;
 let gatewayWarmupPromise = null;

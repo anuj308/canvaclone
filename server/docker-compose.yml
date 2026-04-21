@@ -1,0 +1,89 @@
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: canva-api-gateway
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://your-frontend.vercel.app,http://localhost:3000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      DESIGN: http://design-service:5001
+      UPLOAD: http://upload-service:5002
+      SUBSCRIPTION: http://subscription-service:5003
+    depends_on:
+      - design-service
+      - upload-service
+      - subscription-service
+    networks:
+      - backend-net
+
+  design-service:
+    build:
+      context: ./design-service
+    container_name: canva-design-service
+    environment:
+      PORT: 5001
+      NODE_ENV: production
+      MONGO_URI: ${MONGO_URI}
+    networks:
+      - backend-net
+
+  upload-service:
+    build:
+      context: ./upload-service
+    container_name: canva-upload-service
+    environment:
+      PORT: 5002
+      NODE_ENV: production
+      MONGO_URI: ${MONGO_URI}
+      STABILITY_API_KEY: ${STABILITY_API_KEY:-}
+      cloud_name: ${cloud_name:-}
+      api_key: ${api_key:-}
+      api_secret: ${api_secret:-}
+    networks:
+      - backend-net
+
+  subscription-service:
+    build:
+      context: ./subscription-service
+    container_name: canva-subscription-service
+    environment:
+      PORT: 5003
+      NODE_ENV: production
+      MONGO_URI: ${MONGO_URI}
+    networks:
+      - backend-net
+
+  # Local MongoDB is intentionally disabled for cloud deployment.
+  # Uncomment this block only if you want to run MongoDB locally.
+  # mongo:
+  #   image: mongo:7
+  #   container_name: canva-mongo
+  #   restart: unless-stopped
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo-data:/data/db
+  #   networks:
+  #     - backend-net
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: canva-nginx
+    depends_on:
+      - api-gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - backend-net
+
+# volumes:
+#   mongo-data:
+
+networks:
+  backend-net:
+    driver: bridge

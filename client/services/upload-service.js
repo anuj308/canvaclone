@@ -1,9 +1,8 @@
 import { getSession } from "next-auth/react"
 import axios from "axios";
 import { fetchWithAuth } from "./base-service";
+import { API_URL } from "./api-config";
 
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:5000'
 const RETRYABLE_STATUS_CODES = new Set([429, 502, 503, 504]);
 
 function sleep(ms) {
