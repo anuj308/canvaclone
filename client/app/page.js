@@ -5,6 +5,11 @@ import DesignTypes from "@/components/home/design-types";
 import Aifeatures from "@/components/home/ai-features";
 import RecentDesigns from "@/components/home/recent-design";
 
+export const metadata = {
+  title: "Home | Aakkar",
+  description: "Create and manage your designs with Aakkar",
+};
+
 export default function Home() {
   return <div className="flex min-h-screen bg-white">
     <SideBar/>

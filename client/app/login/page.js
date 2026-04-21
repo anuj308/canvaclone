@@ -1,7 +1,11 @@
-'use client' 
 import Image from "next/image"
 import LoginCard from "@/components/login/login-card"
 import { Suspense } from "react"
+
+export const metadata = {
+  title: "Login | Aakkar",
+  description: "Sign in to your Aakkar account",
+};
 
 const Login = () => {
   return (
