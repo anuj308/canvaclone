@@ -211,6 +211,12 @@ docker compose logs -f
 
 # Rebuild and restart
 docker compose up -d --build
+
+# Stop the production server compose
+docker compose -f docker-compose.yml down
+
+# Stop the development compose
+docker compose -f docker-compose.dev.yml --env-file .env.dev down
 ```
 
 ## Troubleshooting
