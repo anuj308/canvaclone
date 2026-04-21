@@ -93,7 +93,7 @@ function Canvas(){
         }
     },[])
     return ( 
-        <div className="relative w-full h-[600px] overflow-auto" ref={canvasContainerRef}> 
+        <div className="relative w-full h-full overflow-hidden" ref={canvasContainerRef}> 
             <canvas ref={canvasRef}/>
         </div>
     )

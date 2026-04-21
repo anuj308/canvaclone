@@ -35,14 +35,96 @@ export const centerCanvas = (canvas)=>{
     canvasWrapper.style.transform = "translate(-50%,-50%)";
 }
 
+export const fitCanvasToViewport = (canvas, options = {}) => {
+    if(!canvas?.wrapperEl) return 1;
+
+    const normalizedOptions = typeof options === 'number'
+        ? { maxZoom: options }
+        : options;
+
+    const container = canvas.wrapperEl.parentElement;
+    if(!container) return canvas.getZoom?.() || 1;
+
+    const padding = normalizedOptions.padding ?? 40;
+    const maxZoom = normalizedOptions.maxZoom ?? 1;
+
+    const containerWidth = container.clientWidth || 1;
+    const containerHeight = container.clientHeight || 1;
+    const availableWidth = Math.max(containerWidth - padding * 2, 1);
+    const availableHeight = Math.max(containerHeight - padding * 2, 1);
+    const canvasWidth = canvas.width || 1;
+    const canvasHeight = canvas.height || 1;
+
+    const zoom = Math.min(availableWidth / canvasWidth, availableHeight / canvasHeight, maxZoom);
+    const safeZoom = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+
+    const vpt = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+    vpt[0] = safeZoom;
+    vpt[3] = safeZoom;
+    vpt[4] = (containerWidth - canvasWidth * safeZoom) / 2;
+    vpt[5] = (containerHeight - canvasHeight * safeZoom) / 2;
+    canvas.setViewportTransform(vpt);
+    canvas.requestRenderAll();
+
+    return safeZoom;
+}
+
+export const zoomCanvas = (canvas, direction = "in", step = 0.1, options = {}) => {
+    if(!canvas) return 1;
+
+    const minZoom = options.minZoom ?? 0.2;
+    const maxZoom = options.maxZoom ?? 3;
+
+    const currentZoom = canvas.getZoom?.() || 1;
+    const delta = direction === "out" ? -step : step;
+    const targetZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom + delta));
+
+    const centerPoint = typeof canvas.getVpCenter === 'function'
+        ? canvas.getVpCenter()
+        : { x: (canvas.width || 1) / 2, y: (canvas.height || 1) / 2 };
+    const container = canvas.wrapperEl?.parentElement;
+    const containerWidth = container?.clientWidth || canvas.width || 1;
+    const containerHeight = container?.clientHeight || canvas.height || 1;
+    const vpt = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+
+    vpt[0] = targetZoom;
+    vpt[3] = targetZoom;
+    vpt[4] = containerWidth / 2 - centerPoint.x * targetZoom;
+    vpt[5] = containerHeight / 2 - centerPoint.y * targetZoom;
+    canvas.setViewportTransform(vpt);
+    canvas.requestRenderAll();
+    return targetZoom;
+}
+
+const getViewportCenterPoint = (canvas) => {
+    if(!canvas) return { left: 100, top: 100 };
+
+    if(typeof canvas.getVpCenter === "function"){
+        const point = canvas.getVpCenter();
+        return { left: point.x, top: point.y };
+    }
+
+    const zoom = canvas.getZoom?.() || 1;
+    const vpt = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+    const container = canvas.wrapperEl?.parentElement;
+    const viewportWidth = container?.clientWidth || canvas.getWidth?.() || 1;
+    const viewportHeight = container?.clientHeight || canvas.getHeight?.() || 1;
+
+    return {
+        left: (viewportWidth / 2 - vpt[4]) / zoom,
+        top: (viewportHeight / 2 - vpt[5]) / zoom,
+    };
+}
+
 export const addShapeToCanvas = async (canvas,shapeType, customProps={})=>{
     if(!canvas) return null;
     try {
         const fabricModule = await import('fabric');
+        const centerPoint = getViewportCenterPoint(canvas);
 
         const shape = createShape(fabricModule,shapeType, shapeDefinations, {
-            left:100,
-            top:100,
+            left:centerPoint.left,
+            top:centerPoint.top,
             ...customProps
         })
 
@@ -63,10 +145,11 @@ export const addTextToCanvas = async (canvas, text, options = {}, withBackground
 
     try {
         const {IText} = await import('fabric');
+        const centerPoint = getViewportCenterPoint(canvas);
 
         const defaultProps = {
-            left: 100,
-            top: 100,
+            left: centerPoint.left,
+            top: centerPoint.top,
             fontSize: 24,
             fontFamily: 'Arial',
             fill: '#000000',
@@ -100,11 +183,12 @@ export const addImageToCanvas = async (canvas,imageUrl)=>{
 
         return new Promise((resolve,reject)=>{
             imageObj.onload = ()=>{
+                const centerPoint = getViewportCenterPoint(canvas);
                 let image = new FabricImage(imageObj)
                 image.set({
                     id : `image-${Date.now()}`,
-                    top: 100,
-                    left: 100,
+                    top: centerPoint.top,
+                    left: centerPoint.left,
                     padding: 10,
                     cornorSize: 10
                 })

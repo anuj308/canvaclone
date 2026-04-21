@@ -14,6 +14,7 @@ function Header(){
     const {canvas,isEditing, setIsEditing, name, setName,saveStatus,markAsModified,designId} = useEditorStore();
     const {data:session} = useSession();
     const [showExportModal,setShowExportModal] = useState(false);
+
     const handleLogout = ()=>{
         signOut()
     }
@@ -31,6 +32,7 @@ function Header(){
         if(!canvas || !designId) return;
         markAsModified();
     },[name,canvas,designId])
+
     return ( 
         <div className="header-gradient header flex items-center px-4 h-14">
             <div className="flex items-center space-x-2">

@@ -1,4 +1,4 @@
-import { FileText, ImageIcon, Video, Headphones, BarChart3, Presentation, Palette, Smartphone, BookMarked, Star } from 'lucide-react';
+import { FileText, ImageIcon, Video, Headphones, BarChart3, Presentation, Palette, Smartphone, BookMarked, PenSquare } from 'lucide-react';
 
 export const designTypes = [
   {
@@ -47,9 +47,9 @@ export const designTypes = [
     icon: <BookMarked className="w-7 h-7 text-white" strokeWidth={2.5} />
   },
   {
-    label: "Other",
-    bgColor: "bg-gradient-to-br from-slate-400 to-slate-600",
-    icon: <Star className="w-7 h-7 text-white" strokeWidth={2.5} />
+    label: "Whiteboard",
+    bgColor: "bg-gradient-to-br from-slate-400 to-slate-700",
+    icon: <PenSquare className="w-7 h-7 text-white" strokeWidth={2.5} />
   }
 ];
 
