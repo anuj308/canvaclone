@@ -45,6 +45,14 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'API gateway is running',
+    health: '/health',
+  });
+});
+
 // proxy options
 const proxyOptions = {
     proxyReqPathResolver : (req)=>{
@@ -81,14 +89,9 @@ app.use('/v1/media', authMiddleware ,proxy(process.env.UPLOAD,{
      parseReqBody : true
 }))
 
-app.use('/v1/subscription', proxy(process.env.SUBSCRIPTION,{
-    ...proxyOptions,
-}))
-
 app.listen(PORT, () => {
     console.log(`Api Gateway Service running on port ${PORT}`)
     console.log(`Design Service running on port ${process.env.DESIGN}`)
     console.log(`Upload Service running on port ${process.env.UPLOAD}`)
-    console.log(`Subcription Service running on port ${process.env.SUBSCRIPTION}`)
 }
 );

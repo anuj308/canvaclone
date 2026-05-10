@@ -179,6 +179,14 @@ Recommended for Docker backend + local frontend:
 - Point frontend API env (`NEXT_PUBLIC_API_URL`) to your deployed backend gateway domain.
 - Set `CORS_ORIGINS` in backend to include your Vercel domain.
 
+If you want HTTPS on EC2, add a host-level nginx layer in front of the Docker nginx container:
+
+1. Keep Docker nginx published only on `localhost:8080`.
+2. Point `api.yourdomain.com` to the EC2 Elastic IP.
+3. Configure host nginx to proxy `api.yourdomain.com` to `http://127.0.0.1:8080`.
+4. Run `sudo certbot --nginx` on the EC2 host to install the certificate and enable HTTP to HTTPS redirect.
+5. Expose only ports `80` and `443` in the security group.
+
 Example:
 
 - Frontend: `https://your-app.vercel.app`

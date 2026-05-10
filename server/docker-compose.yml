@@ -11,11 +11,9 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       DESIGN: http://design-service:5001
       UPLOAD: http://upload-service:5002
-      SUBSCRIPTION: http://subscription-service:5003
     depends_on:
       - design-service
       - upload-service
-      - subscription-service
     networks:
       - backend-net
 
@@ -42,17 +40,6 @@ services:
       cloud_name: ${cloud_name:-}
       api_key: ${api_key:-}
       api_secret: ${api_secret:-}
-    networks:
-      - backend-net
-
-  subscription-service:
-    build:
-      context: ./subscription-service
-    container_name: canva-subscription-service
-    environment:
-      PORT: 5003
-      NODE_ENV: production
-      MONGO_URI: ${MONGO_URI}
     networks:
       - backend-net
 
