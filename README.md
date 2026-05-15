@@ -179,6 +179,27 @@ Recommended for Docker backend + local frontend:
 - Point frontend API env (`NEXT_PUBLIC_API_URL`) to your deployed backend gateway domain.
 - Set `CORS_ORIGINS` in backend to include your Vercel domain.
 
+### Backend CI/CD
+
+The GitHub Actions workflow in `.github/workflows/deploy.yaml` builds the backend Docker images, pushes them to Docker Hub, then SSHes into the server and restarts the Docker Compose stack with the freshly pushed image tag.
+
+Add these GitHub repository secrets:
+
+- `DOCKERHUB_USERNAME` - Docker Hub username/namespace that owns the image repositories
+- `DOCKERHUB_TOKEN` - Docker Hub access token
+- `HOST` - EC2/Lightsail public host
+- `USERNAME` - SSH user for the server
+- `SSH_KEY` - private SSH key for the server
+
+On the server, keep the repository checked out at `~/canvaclone` and keep the backend runtime values in `server/.env`. The deploy job runs:
+
+```bash
+git pull origin main
+docker compose pull
+docker compose down
+docker compose up -d
+```
+
 If you want HTTPS on EC2, add a host-level nginx layer in front of the Docker nginx container:
 
 1. Keep Docker nginx published only on `localhost:8080`.

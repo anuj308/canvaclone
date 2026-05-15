@@ -1,5 +1,6 @@
 services:
   api-gateway:
+    image: ${DOCKERHUB_USERNAME:-canvaclone}/canvaclone-api-gateway:${IMAGE_TAG:-latest}
     build:
       context: ./api-gateway
     container_name: canva-api-gateway
@@ -18,6 +19,7 @@ services:
       - backend-net
 
   design-service:
+    image: ${DOCKERHUB_USERNAME:-canvaclone}/canvaclone-design-service:${IMAGE_TAG:-latest}
     build:
       context: ./design-service
     container_name: canva-design-service
@@ -29,6 +31,7 @@ services:
       - backend-net
 
   upload-service:
+    image: ${DOCKERHUB_USERNAME:-canvaclone}/canvaclone-upload-service:${IMAGE_TAG:-latest}
     build:
       context: ./upload-service
     container_name: canva-upload-service
