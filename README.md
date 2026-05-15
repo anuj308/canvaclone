@@ -1,87 +1,116 @@
-# Aakaar — Canva Clone
+# Aakaar - Canva Clone
 
-Aakaar is a full-stack Canva-style design editor built with **Next.js** and **Node.js microservices**, focused on scalable architecture, modern UI, and rich canvas editing capabilities.
+Aakaar is a full-stack Canva-style design editor built with a Next.js frontend and Node.js backend microservices. It supports canvas-based editing, project persistence, image uploads, AI image generation, authentication, and a Docker-based backend deployment workflow.
 
 ## Project Overview
 
-This project demonstrates end-to-end product development across frontend, backend, authentication, cloud storage, subscriptions, and AI-assisted design workflows.
+This project demonstrates a production-style full-stack architecture for an online design editor. The frontend provides the editor, dashboard, authentication flow, and subscription UI. The backend is split into focused services behind an API gateway and Nginx reverse proxy.
+
+## Features
+
+- Canva-like editor with shapes, text, images, drawing tools, and object controls
+- Design dashboard with create, load, update, and delete workflows
+- Auto-save support for design data
+- Image upload flow using Cloudinary
+- AI image generation integration
+- Export designs as PNG, JPG, SVG, and JSON
+- Google authentication support
+- Premium/subscription flow with PayPal integration
+- Dockerized backend services for local and cloud deployment
+- CI/CD pipeline that builds Docker images, pushes to Docker Hub, and deploys to EC2/Lightsail
 
 ## Tech Stack
 
-- **Frontend:** Next.js (App Router), React, TailwindCSS, Shadcn UI
-- **Canvas Engine:** Fabric.js
+- **Frontend:** Next.js App Router, React, TailwindCSS, Shadcn UI
+- **Canvas:** Fabric.js
 - **State Management:** Zustand
-- **Authentication:** Auth.js / NextAuth v5
-- **Backend:** Node.js microservices + API Gateway
-- **Database:** MongoDB
-- **Media Storage:** Cloudinary
-- **Payments:** PayPal Subscription integration
+- **Authentication:** Auth.js / NextAuth v5, Google OAuth
+- **Backend:** Node.js, Express, API Gateway, microservices
+- **Database:** MongoDB / MongoDB Atlas
+- **Storage:** Cloudinary
+- **Payments:** PayPal subscriptions
+- **DevOps:** Docker, Docker Compose, Nginx, GitHub Actions, Docker Hub, EC2/Lightsail
 
-## Core Features
+## Architecture Diagram
 
-- Canva-like editor with object-based canvas controls
-- Add and manipulate **shapes, text, freehand drawings, and images**
-- Sidebar panels for Shapes, Uploads, Text, Draw, and AI tools
-- Smart shape factory and custom property editor
-- Canvas lock/unlock mode for focused editing
-- Auto-save and seamless design reloading
-- AI image generation panel (external API based)
-- Image uploads with Cloudinary and canvas preview integration
-- Export designs as **PNG, JPG, SVG, and JSON**
-- Responsive UI using TailwindCSS + Shadcn UI
+```mermaid
+flowchart LR
+  User[User Browser] --> Frontend[Next.js Client]
+  Frontend --> Gateway[Nginx / API Gateway]
 
-## Subscription & Access Control
+  Gateway --> Design[Design Service]
+  Gateway --> Upload[Upload Service]
+  Gateway --> Subscription[Subscription Service]
 
-- Premium membership and upgrade flow
-- PayPal-based subscription handling
-- Free-tier limits (up to 5 designs)
-- AI feature gating for non-premium users
-- Billing info, design history, and upgrade dialogs
-- Delete design projects directly from dashboard
+  Design --> Mongo[(MongoDB)]
+  Upload --> Mongo
+  Subscription --> Mongo
 
-## Microservices Architecture
+  Upload --> Cloudinary[Cloudinary]
+  Upload --> Stability[AI Image API]
+  Subscription --> PayPal[PayPal]
 
-- **API Gateway** for request routing and auth-aware forwarding
-- **Design Service** for design CRUD and history
-- **Upload Service** for media and AI image handling
-- **Subscription Service** for plan and billing lifecycle
+  GitHub[GitHub Actions] --> DockerHub[Docker Hub]
+  DockerHub --> Server[EC2 / Lightsail Docker Compose]
+```
 
-## Project Name Clarification
+## System Architecture Overview
 
-- **Repository name:** Canvas Clone
-- **Product/Website name:** Aakaar
+Aakaar follows a split frontend/backend architecture. The Next.js client handles the user interface, editor experience, authentication screens, and dashboard. Backend traffic goes through Nginx and the API Gateway, which routes requests to dedicated services for design data, media uploads, and subscriptions.
 
-## Notes
-
-This project was developed as a guided build inspired by a long-form YouTube implementation and expanded into a complete, portfolio-ready full-stack system.
+The design and upload services persist application data in MongoDB. The upload service also integrates with Cloudinary for asset storage and an external AI image API for image generation. The subscription service is designed for PayPal billing workflows. In production, the backend services run as Docker containers on EC2/Lightsail and are updated through GitHub Actions and Docker Hub.
 
 ## Repository Structure
 
-- `client/` - Next.js frontend (recommended deployment: Vercel)
-- `server/` - Node.js microservices, API gateway, Nginx, Docker Compose
+```text
+client/                         Next.js frontend
+server/                         Backend services and Docker Compose files
+server/api-gateway/             API gateway service
+server/design-service/          Design CRUD service
+server/upload-service/          Upload and AI image service
+server/subscription-service/    Subscription service
+server/nginx/                   Nginx reverse proxy config
+.github/workflows/deploy.yaml   Backend CI/CD workflow
+```
 
-## Running the Project
+## Local Setup
 
-You can run this project in two common modes:
+### Frontend
 
-1. Frontend local + backend local Docker (development)
-2. Frontend on Vercel + backend on a server via Docker (production-style)
+```bash
+cd client
+npm install
+npm run dev
+```
 
----
+Frontend runs at:
 
-## Backend (Docker)
+```text
+http://localhost:3000
+```
 
-All backend container files are inside `server/`:
+Useful frontend environment values:
 
-- `server/docker-compose.dev.yml` - development stack (includes local MongoDB)
-- `server/docker-compose.yml` - server/deployment stack (uses cloud MongoDB)
-- `server/nginx/default.conf` - reverse proxy to API Gateway
-- `server/.env.dev.example` - sample env for dev compose
-- `server/.env.example` - sample env for server compose
+```env
+NEXT_PUBLIC_API_MODE=docker
+NEXT_PUBLIC_LOCAL_API_URL=http://localhost:5000
+NEXT_PUBLIC_DOCKER_API_URL=http://localhost:8080
+NEXT_PUBLIC_API_URL=
+```
 
-### 1) Development backend (with local MongoDB)
+`NEXT_PUBLIC_API_URL` overrides the local/docker mode values and is useful when pointing the deployed frontend to a deployed backend.
 
-From project root:
+### Backend Without Docker
+
+Each backend service is a separate Node.js app. For most development, Docker Compose is recommended because it starts the services together with consistent networking.
+
+## Docker Setup
+
+All backend Docker files are inside `server/`.
+
+### Development Backend
+
+The development compose file includes local MongoDB.
 
 ```bash
 cd server
@@ -91,26 +120,28 @@ docker compose -f docker-compose.dev.yml --env-file .env.dev up -d --build
 
 Backend entrypoint:
 
-- Nginx/API URL: `http://localhost:8080`
+```text
+http://localhost:8080
+```
 
-Stop:
+Stop development containers:
 
 ```bash
 docker compose -f docker-compose.dev.yml --env-file .env.dev down
 ```
 
-### 2) Server/deployment backend (with cloud MongoDB)
+### Production-Style Backend
 
-From project root:
+The production compose file expects a cloud MongoDB connection string.
 
 ```bash
 cd server
 cp .env.example .env
-# fill required values in .env
+# Fill the required values in .env
 docker compose -f docker-compose.yml up -d --build
 ```
 
-Stop:
+Stop production containers:
 
 ```bash
 docker compose -f docker-compose.yml down
@@ -118,18 +149,20 @@ docker compose -f docker-compose.yml down
 
 ## Required Backend Environment Variables
 
-In `server/.env` (or `.env.dev`), configure:
+Configure these in `server/.env` for deployment:
 
-- `MONGO_URI` - cloud MongoDB connection string (required for server compose)
-- `GOOGLE_CLIENT_ID` - used by gateway token verification
-- `GOOGLE_CLIENT_SECRET` - included for auth configuration completeness
-- `CORS_ORIGINS` - comma-separated frontend origins
-- `STABILITY_API_KEY` - AI image generation key
+- `MONGO_URI` - MongoDB connection string
+- `GOOGLE_CLIENT_ID` - Google OAuth client ID
+- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
+- `CORS_ORIGINS` - comma-separated allowed frontend origins
+- `STABILITY_API_KEY` - AI image generation API key
 - `cloud_name` - Cloudinary cloud name
 - `api_key` - Cloudinary API key
 - `api_secret` - Cloudinary API secret
+- `DOCKERHUB_USERNAME` - Docker Hub namespace used by Docker Compose image names
+- `IMAGE_TAG` - Docker image tag to run, usually set by CI/CD
 
-## Backend Service Ports (inside Docker network)
+## Backend Service Ports
 
 - API Gateway: `5000`
 - Design Service: `5001`
@@ -137,95 +170,90 @@ In `server/.env` (or `.env.dev`), configure:
 - Subscription Service: `5003`
 - Nginx public entrypoint: `8080 -> 80`
 
----
+## Deployment Link
 
-## Frontend (Next.js)
+- Frontend: `https://aakaar-alpha.vercel.app`
+- Backend: configure your EC2/Lightsail public IP or API domain, for example `https://api.yourdomain.com`
 
-From project root:
+For production, set the frontend environment variable:
 
-```bash
-cd client
-npm install
-npm run dev
+```env
+NEXT_PUBLIC_API_URL=https://api.yourdomain.com
 ```
 
-Frontend URL:
+Also set backend CORS:
 
-- `http://localhost:3000`
+```env
+CORS_ORIGINS=https://aakaar-alpha.vercel.app
+```
 
-### Frontend API URL Switching
+## CI/CD Workflow Explanation
 
-Frontend API resolution supports local and Docker gateway modes via `client/.env.local`:
+The backend deployment workflow is defined in `.github/workflows/deploy.yaml`.
 
-- `NEXT_PUBLIC_API_MODE=local` uses `NEXT_PUBLIC_LOCAL_API_URL`
-- `NEXT_PUBLIC_API_MODE=docker` uses `NEXT_PUBLIC_DOCKER_API_URL`
-- `NEXT_PUBLIC_API_URL` overrides both when set (useful for deployed backend)
+On every push to `main`, GitHub Actions:
 
-Default local values:
+1. Checks out the repository.
+2. Logs in to Docker Hub using GitHub secrets.
+3. Builds Docker images for:
+   - `api-gateway`
+   - `design-service`
+   - `upload-service`
+4. Pushes each image to Docker Hub with two tags:
+   - the commit SHA, for traceable deployments
+   - `latest`, for convenience
+5. SSHes into the EC2/Lightsail server.
+6. Pulls the latest repository code.
+7. Pulls the newly built Docker images.
+8. Stops the current containers.
+9. Starts the Docker Compose stack with the new images.
+10. Runs `docker image prune -f` to remove dangling unused image layers and reduce disk usage.
 
-- `NEXT_PUBLIC_LOCAL_API_URL=http://localhost:5000`
-- `NEXT_PUBLIC_DOCKER_API_URL=http://localhost:8080`
+Required GitHub repository secrets:
 
-Recommended for Docker backend + local frontend:
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+- `HOST`
+- `USERNAME`
+- `SSH_KEY`
 
-- `NEXT_PUBLIC_API_MODE=docker`
+The server should have the repository checked out at:
 
----
+```text
+~/canvaclone
+```
 
-## Recommended Deployment Pattern
-
-- Deploy `client/` on Vercel.
-- Deploy `server/` on a VM/container host using Docker Compose.
-- Point frontend API env (`NEXT_PUBLIC_API_URL`) to your deployed backend gateway domain.
-- Set `CORS_ORIGINS` in backend to include your Vercel domain.
-
-### Backend CI/CD
-
-The GitHub Actions workflow in `.github/workflows/deploy.yaml` builds the backend Docker images, pushes them to Docker Hub, then SSHes into the server and restarts the Docker Compose stack with the freshly pushed image tag.
-
-Add these GitHub repository secrets:
-
-- `DOCKERHUB_USERNAME` - Docker Hub username/namespace that owns the image repositories
-- `DOCKERHUB_TOKEN` - Docker Hub access token
-- `HOST` - EC2/Lightsail public host
-- `USERNAME` - SSH user for the server
-- `SSH_KEY` - private SSH key for the server
-
-On the server, keep the repository checked out at `~/canvaclone` and keep the backend runtime values in `server/.env`. The deploy job runs:
+The deploy job runs the equivalent of:
 
 ```bash
+cd ~/canvaclone
 git pull origin main
+cd server
 docker compose pull
 docker compose down
 docker compose up -d
+docker image prune -f
 ```
 
-If you want HTTPS on EC2, add a host-level nginx layer in front of the Docker nginx container:
+## Current Deployment Strategy
 
-1. Keep Docker nginx published only on `localhost:8080`.
-2. Point `api.yourdomain.com` to the EC2 Elastic IP.
-3. Configure host nginx to proxy `api.yourdomain.com` to `http://127.0.0.1:8080`.
-4. Run `sudo certbot --nginx` on the EC2 host to install the certificate and enable HTTP to HTTPS redirect.
-5. Expose only ports `80` and `443` in the security group.
+This project uses a build-on-CI, run-on-server strategy:
 
-Example:
+- GitHub Actions builds the Docker images.
+- Docker Hub stores the images.
+- EC2/Lightsail pulls and runs the images.
 
-- Frontend: `https://your-app.vercel.app`
-- Backend Gateway: `https://api.yourdomain.com`
-- Backend `CORS_ORIGINS=https://your-app.vercel.app`
-- Frontend `NEXT_PUBLIC_API_URL=https://api.yourdomain.com`
-
----
+This is usually better than building directly on the server because the server stays lighter, deployments are more repeatable, and each release can be traced back to a commit SHA.
 
 ## Health Check
 
-After backend is up:
+After the backend is running:
 
 ```bash
 curl http://localhost:8080/health
 ```
 
-Expected response: JSON with gateway health status.
+Expected response: JSON health status from the gateway.
 
 ## Useful Docker Commands
 
@@ -238,19 +266,22 @@ docker compose ps
 # Follow logs
 docker compose logs -f
 
-# Rebuild and restart
+# Rebuild and restart locally
 docker compose up -d --build
 
-# Stop the production server compose
-docker compose -f docker-compose.yml down
+# Pull pushed images and restart
+docker compose pull
+docker compose down
+docker compose up -d
 
-# Stop the development compose
-docker compose -f docker-compose.dev.yml --env-file .env.dev down
+# Remove dangling unused images
+docker image prune -f
 ```
 
 ## Troubleshooting
 
-- If frontend gets CORS errors, update `CORS_ORIGINS` in backend env.
-- If auth fails, verify `GOOGLE_CLIENT_ID` matches the token issuer app.
-- If upload/AI routes fail, verify Cloudinary and Stability keys.
-- If compose warns `MONGO_URI` is empty, fill it in `.env` before running.
+- If the frontend gets CORS errors, update `CORS_ORIGINS`.
+- If auth fails, verify `GOOGLE_CLIENT_ID` and Google OAuth settings.
+- If upload or AI routes fail, verify Cloudinary and Stability API keys.
+- If Docker Compose warns that `MONGO_URI` is empty, fill it in `server/.env`.
+- If EC2 runs out of disk space, check old Docker images with `docker images` and unused data with `docker system df`.
