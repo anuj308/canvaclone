@@ -1,8 +1,8 @@
 services:
   api-gateway:
     image: ${DOCKERHUB_USERNAME:-canvaclone}/canvaclone-api-gateway:${IMAGE_TAG:-latest}
-    build:
-      context: ./api-gateway
+    # build:
+    #   context: ./api-gateway
     container_name: canva-api-gateway
     environment:
       PORT: 5000
@@ -20,8 +20,8 @@ services:
 
   design-service:
     image: ${DOCKERHUB_USERNAME:-canvaclone}/canvaclone-design-service:${IMAGE_TAG:-latest}
-    build:
-      context: ./design-service
+    # build:
+    #   context: ./design-service
     container_name: canva-design-service
     environment:
       PORT: 5001
@@ -32,8 +32,8 @@ services:
 
   upload-service:
     image: ${DOCKERHUB_USERNAME:-canvaclone}/canvaclone-upload-service:${IMAGE_TAG:-latest}
-    build:
-      context: ./upload-service
+    # build:
+    #   context: ./upload-service
     container_name: canva-upload-service
     environment:
       PORT: 5002

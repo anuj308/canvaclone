@@ -60,6 +60,6 @@ jobs:
             cd server
             echo "$DOCKERHUB_TOKEN" | sudo docker login -u "$DOCKERHUB_USERNAME" --password-stdin
             sudo -E docker compose pull
-            sudo -E docker compose down
+            # sudo -E docker compose down
             sudo -E docker compose up -d
             sudo docker image prune -f
