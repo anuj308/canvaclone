@@ -8,6 +8,7 @@ This project demonstrates a production-style full-stack architecture for an onli
 
 ## Features
 
+
 - Canva-like editor with shapes, text, images, drawing tools, and object controls
 - Design dashboard with create, load, update, and delete workflows
 - Auto-save support for design data
